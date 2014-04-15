@@ -1,0 +1,12 @@
+Village;Village;Akulivik;Aupaluk;Inukjuak;Ivujivik;Kangiqsualujjuaq;Kangiqsujuaq;Kangirsuk;Kuujjuaq;Puvirnituq;Quaqtaq;Salluit;Tasiujaq;Umiujaq;
+Type de sol;Ground Type;Clay;Peat;Roc;Sand;Till;
+Couverture;Cover type;None;Lichen;Low shrub;High shrub;
+Options;Options;
+Bouton;Start;Reset;End;
+FormOptions;
+lblMoisDebut;First month;
+comboxBoxMois;October;November;December;January;February;March;April;May;June;July;August;September;
+lblVitesseSim;Simulation speed;
+lblOpacite;Ground temperature opacity;
+lblLangue;Language;French;English;
+nomGraphe;Air temperature en fonction du mois;

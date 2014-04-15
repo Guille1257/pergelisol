@@ -1,0 +1,925 @@
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Drawing.Imaging;
+using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using System.Threading;
+
+namespace simulateurPergelisol_alpha_0._1
+{
+    public partial class Form1 : Form
+    {
+        private Graphique m_graphique;
+        private panelTransparent m_tableauActif;
+
+        //Variables du menu
+        private List<ToolStripMenuItem> m_listeVillage;
+        private List<ToolStripMenuItem> m_listeCoverType;
+        private List<ToolStripMenuItem> m_listeSol;
+        private ToolStripMenuItem m_villageItem,
+                                  m_coverTypeItem,
+                                  m_solItem;
+
+        //Variables gestion chargement
+        private bool m_langueCharger,
+                     m_overrideSimulation,
+                     m_finiTracer;
+        private Dictionary<string, string> m_equivalentSol;
+        private Dictionary<string, string> m_equivalentCouverture;
+
+        //Threading
+        private Thread m_simulation;
+
+        //String pour langage
+        private string m_nomGraphique,
+                       m_moisDebut,
+                       m_langue;
+
+        private Dictionary<string, string> m_equivalentMois;
+        private Option m_formOption;
+
+        //Paramètre
+        private int m_indexMoisDebut;
+        private int m_vitesseSimulation;
+        private int m_opacite;
+
+
+        private Panel test;
+
+        public Form1()
+        {
+            InitializeComponent();
+            this.FormClosing += new FormClosingEventHandler(this.form_close);
+            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            m_listeVillage = new List<ToolStripMenuItem>();
+            m_listeCoverType = new List<ToolStripMenuItem>();
+            m_listeSol = new List<ToolStripMenuItem>();
+            m_equivalentSol = new Dictionary<string, string>();
+            m_equivalentCouverture = new Dictionary<string, string>();
+            m_equivalentMois = new Dictionary<string, string>();
+            m_langue = "Français";
+            chargerLangage(m_langue);
+
+            //form option
+            m_formOption = new Option(this, m_langue, m_moisDebut);
+
+            //paramètre
+            m_vitesseSimulation = 20;
+            
+            m_villageItem = m_listeVillage[0];
+            m_coverTypeItem = m_listeCoverType[0];
+            m_solItem = m_listeSol[0];
+            m_villageItem.Checked = m_coverTypeItem.Checked = m_solItem.Checked = true;
+            this.panelTableau.BackgroundImage = Image.FromFile("image/Argile.png");
+            this.panelTableau.BackColor = Color.FromArgb(255, 111, 82, 64);
+            //88, 65, 51
+            this.panelTableau.BackgroundImageLayout = ImageLayout.Stretch;
+            //genererSnowFall();
+            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
+            initialiserBoutonSimulation();
+            genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
+
+            m_finiTracer = true;
+            this.panelGraphique.BackColor = Color.AliceBlue;
+            //m_graphique.Visible = false;
+
+        }
+
+        #region Méthode publique
+
+        public void changerMoisGrasGraphique(int indexMois)
+        {
+            if (indexMois >= 0)
+            {
+                m_graphique.changerMoisGras(m_equivalentMois.ElementAt(indexMois).Key);
+            }
+        }
+
+        public void annulerMoisGrasGraphique()
+        {
+            m_graphique.changerMoisGras(null);
+        }
+
+        public void changerLangue(string langue)
+        {
+            m_langue = langue;
+            chargerLangage(m_langue);
+            this.panelGraphique.Controls.Remove(m_graphique);
+            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
+            this.panelTableau.Controls.Remove(m_tableauActif);
+            genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
+
+        }
+
+        public void changerVitesseSim(int i)
+        {
+            m_vitesseSimulation = i;
+            
+        }
+
+        public void changerOpacite(int i)
+        {
+            this.m_tableauActif.changerOpacite(i);
+        }
+        public void changerMoisDebut(string i)
+        {
+            m_moisDebut = i;
+            this.panelGraphique.Controls.Remove(m_graphique);
+            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
+            this.panelTableau.Controls.Remove(m_tableauActif);
+            genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
+
+            switch (m_equivalentCouverture[this.m_coverTypeItem.Text])
+            {
+                case "none":
+                    m_tableauActif.changerSolType(0);
+                    m_graphique.switchBackground(0);
+                    break;
+
+                case "lichen":
+                    m_tableauActif.changerSolType(1);
+                    m_graphique.switchBackground(1);
+                    break;
+
+                case "low":
+                    m_tableauActif.changerSolType(2);
+                    m_graphique.switchBackground(2);
+                    break;
+
+                case "high":
+                    m_tableauActif.changerSolType(3);
+                    m_graphique.switchBackground(3);
+                    break;
+            }
+        }
+
+        #endregion
+
+
+        #region Méthode simulation
+
+        private void sequenceDessin()
+        {
+            int vitesseTracage = m_vitesseSimulation,
+                dernierPoint,
+                prochainPoint;
+
+            m_finiTracer = false;
+
+            dernierPoint = 0;
+            prochainPoint = 1;
+
+            if (!m_overrideSimulation)
+            {
+                while (prochainPoint < 12)
+                {
+                    dernierPoint = prochainPoint;
+                    m_tableauActif.setProchainMois(prochainPoint);
+                    m_graphique.sequenceDessin(prochainPoint, vitesseTracage,false);
+                    prochainPoint += 1;
+                }
+
+                m_tableauActif.setProchainMois(prochainPoint);
+            }
+
+            else
+            {
+                prochainPoint = 12;
+                m_tableauActif.setProchainMois(prochainPoint);
+                m_graphique.sequenceDessin(prochainPoint, vitesseTracage,true);
+            }
+
+            m_finiTracer = true;
+        }
+
+        private void clearSimulation()
+        {
+            m_tableauActif.nettoyer();
+            m_graphique.nettoyer();
+            m_finiTracer = true;
+        }
+
+        #endregion
+
+        #region méthode initialisation du form
+
+
+
+        private void initialiserBoutonSimulation()
+        {
+            this.buttonFin.Click += new System.EventHandler(this.buttonFin_Click);
+            this.buttonDebut.Click += new System.EventHandler(this.buttonDebut_Click);
+
+        }
+
+
+        private void genererGraphique(Point location, Size size, string nomGraphique)
+        {
+            float[] coordY = new float[12];
+            string[] nomX = new string[12];
+            lireAirTemperature(ref coordY, ref nomX);
+            this.m_graphique = new Graphique(location, size, coordY, nomX, nomGraphique);
+            this.panelGraphique.Controls.Add(this.m_graphique);
+        }
+
+        private void genererTableauActif(Point location, Size size)
+        {
+            this.m_tableauActif = new panelTransparent(lecturetemp(), m_indexMoisDebut,this);
+            this.m_tableauActif.Location = location;
+            this.m_tableauActif.Size = size;
+            this.m_tableauActif.Height -= 40;
+            this.m_tableauActif.Height = this.m_tableauActif.Height - (this.m_tableauActif.Height % 13);
+            this.m_tableauActif.Width = (int)(m_graphique.getEspaceParGraduationX()) * 12;
+            this.m_tableauActif.Cursor = System.Windows.Forms.Cursors.Cross;
+            this.m_tableauActif.changerSolType(0);
+            this.panelTableau.Controls.Add(this.m_tableauActif);
+        }
+
+        private void chargerLangage(String langage)
+        {
+            string[] tabTexte = null;
+            string[] nomSol = { "clay", "peat", "roc", "sand", "till" };
+            string[] nomCouverture = { "none", "lichen", "low", "high" };
+            string[] nomMois = {"October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August", "September" };
+
+            int indexTypeSol,
+                indexCouverture,
+                indexOption,
+                indexBouton,
+                indexNomMois,
+                indexNomGraphe;
+
+            try
+            {
+                using (StreamReader sr = new StreamReader("langage/" + langage + ".txt", Encoding.GetEncoding("iso-8859-1")))
+                {
+                    tabTexte = sr.ReadToEnd().Split(';');
+                    sr.Close();
+                }
+
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                //TO DO
+            }
+
+            if (this.m_langueCharger)
+            {
+                m_equivalentCouverture.Clear();
+                m_equivalentSol.Clear();
+            }
+
+            if (tabTexte != null)
+            {
+                indexTypeSol = Array.IndexOf(tabTexte, "\nType de sol");
+                indexCouverture = Array.IndexOf(tabTexte, "\nCouverture");
+                indexBouton = Array.IndexOf(tabTexte, "\nBouton");
+                indexOption = Array.IndexOf(tabTexte, "\nOptions");
+                indexNomMois = Array.IndexOf(tabTexte, "\ncomboxBoxMois");
+                indexNomGraphe = Array.IndexOf(tabTexte, "\nnomGraphe");
+
+                //Chargement nom des villages
+                for (int i = 2; i < indexTypeSol; i++)
+                {
+                    if (!this.m_langueCharger)
+                    {
+                        this.m_listeVillage.Add(new ToolStripMenuItem());
+                        this.m_listeVillage[i - 2].Click += new System.EventHandler(this.ToolStripMenuItem_click);
+                    }
+                    this.m_listeVillage[i - 2].Name = tabTexte[i];
+                    this.m_listeVillage[i - 2].Text = tabTexte[i];
+                    this.villageToolStripMenuItem.DropDownItems.Add(this.m_listeVillage[i - 2]);
+                }
+
+                //Chargement type de sol
+                for (int i = indexTypeSol + 2; i < indexCouverture; i++)
+                {
+                    if (!this.m_langueCharger)
+                    {
+                        this.m_listeSol.Add(new ToolStripMenuItem());
+                        this.m_listeSol[i - 2 - indexTypeSol].Click += new System.EventHandler(this.ToolStripMenuItem_click);
+                    }
+                    this.m_equivalentSol.Add(tabTexte[i], nomSol[i - indexTypeSol - 2]);
+                    this.m_listeSol[i - 2 - indexTypeSol].Name = tabTexte[i];
+                    this.m_listeSol[i - 2 - indexTypeSol].Text = tabTexte[i];
+                    this.typeDeSolToolStripMenuItem.DropDownItems.Add(this.m_listeSol[i - 2 - indexTypeSol]);
+                }
+
+                //Chargement couverure
+                for (int i = indexCouverture + 2; i < indexOption; i++)
+                {
+                    if (!this.m_langueCharger)
+                    {
+                        this.m_listeCoverType.Add(new ToolStripMenuItem());
+                        this.m_listeCoverType[i - 2 - indexCouverture].Click += new System.EventHandler(this.ToolStripMenuItem_click);
+                    }
+                    this.m_equivalentCouverture.Add(tabTexte[i], nomCouverture[i - indexCouverture - 2]);
+                    this.m_listeCoverType[i - 2 - indexCouverture].Name = tabTexte[i];
+                    this.m_listeCoverType[i - 2 - indexCouverture].Text = tabTexte[i];
+                    this.couvertureToolStripMenuItem.DropDownItems.Add(this.m_listeCoverType[i - 2 - indexCouverture]);
+                }
+
+
+                if (this.m_langueCharger)
+                {
+                    this.m_equivalentMois.Clear();
+                }
+
+                //Chargement nom mois
+                for (int i = indexNomMois + 1; i < indexNomMois + 13; i++)
+                {
+                    this.m_equivalentMois.Add(tabTexte[i], nomMois[i - 1 - indexNomMois]);
+
+                }
+
+
+                this.villageToolStripMenuItem.Text = tabTexte[1];
+                this.typeDeSolToolStripMenuItem.Text = tabTexte[indexTypeSol + 1];
+                this.couvertureToolStripMenuItem.Text = tabTexte[indexCouverture + 1];
+                this.optionsToolStripMenuItem.Text = tabTexte[indexOption + 1];
+                this.buttonDemarrer.Text = tabTexte[indexBouton + 1];
+                this.buttonDebut.Text = tabTexte[indexBouton + 2];
+                this.buttonFin.Text = tabTexte[indexBouton + 3];
+                this.m_langueCharger = true;
+                m_nomGraphique = tabTexte[indexNomGraphe + 1];
+                m_moisDebut = m_equivalentMois.ElementAt(0).Key;
+            }
+        }
+
+        #endregion
+
+        #region méthode lecture fichier
+
+        public string[,] lecturetemp()
+        {
+            string[,] tableau = new string[56, 13];
+            string[] ligne;
+            int counter = 0;
+            int cnb = 0;
+            string line;
+
+            System.IO.StreamReader file = new System.IO.StreamReader("village/" + m_villageItem.Text + "/" + m_villageItem.Text + m_equivalentSol[m_solItem.Text] + ".csv");
+
+            while ((line = file.ReadLine()) != null)
+            {
+                ligne = line.Split(';');
+                cnb = 0;
+                while (cnb < 13)
+                {
+                    tableau[counter, cnb] = ligne[cnb];
+                    cnb++;
+                }
+                counter++;
+            }
+
+            file.Close();
+            return tableau;
+        }
+
+        private void lireAirTemperature(ref float[] coordY, ref string[] nomX)
+        {
+            string[] tabTexte = null;
+            int compteur = 0;
+
+            try
+            {
+                using (StreamReader sr = new StreamReader("village/" + m_villageItem.Text + "/airTemperature.csv"))
+                {
+                    tabTexte = sr.ReadToEnd().Split(new string[] { ";", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    sr.Close();
+                }
+
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                //TO DO
+            }
+
+            if (tabTexte != null)
+            {
+                m_indexMoisDebut = Array.IndexOf(tabTexte, m_equivalentMois[m_moisDebut]);
+                if (m_indexMoisDebut != 0)
+                {
+                    for (int i = m_indexMoisDebut; i < 12; i++)
+                    {
+                        nomX[compteur] = m_equivalentMois.ElementAt(i).Key;
+                        coordY[compteur] = Single.Parse(tabTexte[i + 12]);
+                        compteur++;
+                    }
+
+                    for (int i = 0; i <= m_indexMoisDebut - 1; i++)
+                    {
+                        nomX[compteur] = m_equivalentMois.ElementAt(i).Key;
+                        coordY[compteur] = Single.Parse(tabTexte[i + 12]);
+                        compteur++;
+                    }
+
+                }
+                else
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        nomX[i] = m_equivalentMois.ElementAt(i).Key;
+                        coordY[i] = Single.Parse(tabTexte[i + 12]);
+                    }
+                }
+            }
+
+
+        }
+
+        #endregion
+
+        #region Gestion evènement du form
+
+        private void panelTableau_draw(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            SolidBrush brushPoint = new SolidBrush(Color.Black);
+            Pen penDraw = new Pen(Brushes.Black);
+            penDraw.Width = 1;
+            brushPoint.Color = Color.FromArgb(255, 120, 96, 74);
+            //e.Graphics.FillRectangle(brushPoint, new Rectangle(0, 0, this.Size.Width, m_tableauActif.Size.Height/13));
+            e.Graphics.DrawImage(Image.FromFile("image/top_panel.png"), new Point(0, 0));
+            //e.Graphics.DrawLine(penDraw, new Point(0, 0), new Point(this.Size.Width, 0));
+            penDraw.Width = 1;
+            e.Graphics.DrawLine(penDraw, new Point(0, m_tableauActif.Size.Height / 13), new Point(this.Size.Width, m_tableauActif.Size.Height / 13));
+            brushPoint.Dispose();
+            penDraw.Dispose();
+        }
+
+        private void form_close(object sender, EventArgs e)
+        {
+            try
+            {
+                m_simulation.Abort();
+            }
+            catch(Exception ep)
+             {
+
+             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (m_finiTracer)
+            {
+                m_overrideSimulation = false;
+                m_simulation = new Thread(this.sequenceDessin);
+                m_simulation.Start();
+
+            }
+        }
+
+        private void buttonFin_Click(object sender, EventArgs e)
+        {
+
+            m_overrideSimulation = true;
+
+
+            if (m_finiTracer)
+            {
+                m_simulation = new Thread(this.sequenceDessin);
+                m_simulation.Start();
+
+            }
+
+            else
+            {
+                m_simulation.Abort();
+                m_simulation = new Thread(this.sequenceDessin);
+                m_simulation.Start();
+            }
+            panelTableau.Controls.Add(test);
+        }
+
+        private void buttonDebut_Click(object sender, EventArgs e)
+        {
+            clearSimulation();
+            try
+            {
+                m_simulation.Abort();
+            }
+            catch (Exception ep)
+            {
+
+            }
+        }
+
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (m_formOption.IsDisposed)
+            {
+                m_formOption = new Option(this, m_langue, m_moisDebut);
+                m_formOption.Visible = true;
+            }
+            else
+            {
+                m_formOption.Visible = true;
+            }
+        }
+
+        private void ToolStripMenuItem_click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem temp = (ToolStripMenuItem)sender;
+
+            if (temp.OwnerItem == this.villageToolStripMenuItem)
+            {
+                float[] coordY = new float[12];
+                string[] nomX = new string[12];
+                lireAirTemperature(ref coordY, ref nomX);
+                this.m_villageItem.CheckState = CheckState.Unchecked;                
+                temp.CheckState = CheckState.Checked;
+                this.m_villageItem = temp;
+                this.m_graphique.updateDonnee(coordY, nomX, "Température en fonction du mois");
+                this.m_tableauActif.changerDonne(lecturetemp());
+            }
+
+            else if (temp.OwnerItem == this.typeDeSolToolStripMenuItem)
+            {   
+                this.m_solItem.CheckState = CheckState.Unchecked;
+                temp.CheckState = CheckState.Checked;
+                this.m_solItem = temp;
+
+                switch (m_equivalentSol[m_solItem.Text])
+                {
+                    case "clay":
+                        this.panelTableau.BackgroundImage = Image.FromFile("image/Argile.png");
+                        break;
+
+                    case "peat":
+                        this.panelTableau.BackgroundImage = Image.FromFile("image/Tourbe.png");
+                        break;
+
+                    case "roc":
+                        this.panelTableau.BackgroundImage = Image.FromFile("image/Roc.png");
+                        break;
+
+                    case"sand":
+                        this.panelTableau.BackgroundImage = Image.FromFile("image/Sable.png");
+                        break;
+
+                    case "till":
+                        this.panelTableau.BackgroundImage = Image.FromFile("image/Till.png");
+                        break;
+
+                }
+
+                this.m_tableauActif.changerDonne(lecturetemp());
+            }
+
+            else if (temp.OwnerItem == this.couvertureToolStripMenuItem)
+            {
+                this.m_coverTypeItem.CheckState = CheckState.Unchecked;
+                temp.CheckState = CheckState.Checked;
+                this.m_coverTypeItem = temp;
+
+                switch (m_equivalentCouverture[this.m_coverTypeItem.Text])
+                {
+                    case "none":
+                        m_tableauActif.changerSolType(0);
+                        m_graphique.switchBackground(0);
+                        break;
+
+                    case "lichen":
+                        m_tableauActif.changerSolType(1);
+                        m_graphique.switchBackground(1);
+                        break;
+
+                    case "low":
+                        m_tableauActif.changerSolType(2);
+                        m_graphique.switchBackground(2);
+                        break;
+
+                    case "high":
+                        m_tableauActif.changerSolType(3);
+                        m_graphique.switchBackground(3);
+                        break;
+                }
+
+            }
+
+        }
+
+
+        #endregion
+
+    }
+
+    public class panelTransparent : PictureBox
+    {
+        private Form1 m_formParent;
+        private string[,] m_tableau = new string[57, 14];
+        private PictureBox m_toolTip;
+        private Label m_labelToolTip;
+        private float m_espaceX;
+        private int m_moisEnCours,
+                    m_typeSol;
+        private delegate void dessin();
+        private dessin callBackDessin;
+        private bool m_commencerDessin;
+        private int m_indexMoisDebut;
+        private int m_indexMoisEnCours;
+        private Bitmap m_toolTipBMP;
+        private int opacite = 200;
+        #region Constructeurs
+
+        public panelTransparent(string[,] tableau, int indexMoisDebut, Form1 parent)
+            : base()
+        {
+            m_formParent = parent;
+            m_tableau = tableau;
+            m_indexMoisDebut = indexMoisDebut + 1;
+            this.MouseEnter += new System.EventHandler(this.mouseEnter);
+            this.MouseLeave += new System.EventHandler(this.mouseLeave);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
+            m_moisEnCours = 0;
+            m_toolTip = new PictureBox();
+            m_toolTip.BackColor = Color.Tomato;
+            m_labelToolTip = new Label();
+            m_toolTip.Location = new Point(0, 0);
+            m_toolTip.Size = new Size(100, 30);
+            m_toolTip.Visible = false;
+            m_labelToolTip.Visible = false;
+            m_labelToolTip.Location = new Point(0, 0);
+            this.Controls.Add(m_toolTip);
+            m_toolTip.Controls.Add(m_labelToolTip);
+            callBackDessin = new dessin(this.invalidateControl);
+            this.BackColor = Color.Transparent;
+            m_commencerDessin = false;
+            m_indexMoisEnCours = -1; //valeur initilisation
+            m_toolTipBMP = new Bitmap(100, 30);
+        }
+
+        #endregion
+
+        #region Méthode public
+
+        public void changerSolType(int type)
+        {
+            m_typeSol = type;
+            this.Invalidate();
+            this.Refresh();
+            this.Update();
+        }
+
+        public void changerDonne(string[,] tableau)
+        {
+            m_tableau = tableau;
+            this.Invalidate();
+            this.Refresh();
+            this.Update();
+        }
+
+        public void changerOpacite(int i)
+        {
+            opacite = i;
+            this.Invalidate();
+            this.Refresh();
+            this.Update();
+        }
+        public void nettoyer()
+        {
+            m_commencerDessin = false;
+            this.Invoke(callBackDessin);
+        }
+
+        public void setEspaceX(float i)
+        {
+            m_espaceX = i;
+        }
+
+        public void setProchainMois(int mois)
+        {
+            m_commencerDessin = true;
+            m_moisEnCours = mois;
+            this.Invoke(callBackDessin);
+        }
+
+        #endregion
+
+        private void invalidateControl()
+        {
+            this.Invalidate();
+            this.Refresh();
+            this.Update();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            if (m_commencerDessin)
+            {
+                if (m_commencerDessin)
+                {
+                    m_espaceX = this.Width / 12;
+                    Pen pen = new Pen(Color.Black);
+                    SolidBrush brush;
+                    SolidBrush tomatoBrush = new SolidBrush(Color.Tomato);
+                    Font fontToolTip = new Font(FontFamily.GenericSansSerif, 8);
+                    for (int x = 0; x < m_moisEnCours; x++)
+                    {
+                        for (int y = 0; y < 13; y++)
+                        {
+                            if (x + m_indexMoisDebut > 12)
+                            {
+                                brush = getBrush(Convert.ToDouble(m_tableau[(y + 1) + m_typeSol * 14, -(12 - m_indexMoisDebut) + (x)]), opacite);
+
+                            }
+
+                            else
+                            {
+                                brush = getBrush(Convert.ToDouble(m_tableau[(y + 1) + m_typeSol * 14, x + m_indexMoisDebut]), opacite);
+
+                            }
+                            e.Graphics.FillRectangle(brush, (float)(x * m_espaceX), (float)(y * this.Height / 13), (float)(m_espaceX), (float)(this.Height / 13));
+                            brush.Dispose();
+                            e.Graphics.DrawRectangle(pen, (float)(x * m_espaceX), (float)(y * this.Height / 13), (float)(m_espaceX), (float)(this.Height / 13));
+
+                        }
+                    }
+
+                    if (m_moisEnCours == 12)
+                        e.Graphics.DrawRectangle(pen, 0, 0, m_moisEnCours * m_espaceX - 1, this.Size.Height - 1);
+                    else
+                       e.Graphics.DrawRectangle(pen, 0, 0, m_moisEnCours * m_espaceX, this.Size.Height - 1);
+
+                    //draw tooltip
+                    e.Graphics.FillRectangle(tomatoBrush, new Rectangle(m_toolTip.Location, m_toolTip.Size));
+                    e.Graphics.DrawString(m_labelToolTip.Text, fontToolTip, new SolidBrush(Color.Black), new PointF(m_toolTip.Location.X, m_toolTip.Location.Y));
+
+                    pen.Dispose();
+                }
+            }
+
+            base.OnPaint(e);
+        }
+
+        private SolidBrush getBrush(double val, int transparence)
+        {
+            SolidBrush brushReturn = new SolidBrush(Color.FromArgb(150, 0, 0, 255));
+            double[] upperBound = {25,20,15,13,11,9,7,5,4,3,2,1.5,1,9.5,-0.49,-0.5,-1,-1.5,-2,-3,-4,-5,-7,-9,-11,-13,-15,-20,-25};
+            string[] rgbValueTab = {"230-0-0", "232-39-0", "237-59-0","240-80-0", "242-97-0", "245-110-0", "247-128-0", "250-142-0", "252-160-0", "252-173-0",
+                                    "255-191-0", "255-204-0","255-221-0","255-238-0","255-255-0","115-222-217","109-211-214","102-199-212","96-187-209","89-175-207",
+                                    "82-165-204", "75-155-201", "68-144-199" ,"61-135-196" ,"52-125-194" ,"43-114-189" ,"35-106-186" ,"24-96-184" ,"2-88-181"};
+            string[] rgbValue;
+
+            for (int i = 0; i < upperBound.Length; i++)
+            {
+                if (val >= upperBound[0])
+                {
+                    rgbValue = rgbValueTab[0].Split('-');
+                    brushReturn.Color = Color.FromArgb(transparence, Convert.ToInt32(rgbValue[0]), Convert.ToInt32(rgbValue[1]), Convert.ToInt32(rgbValue[2]));
+                    break;
+                }
+
+                else if (val <= upperBound[upperBound.Length - 1])
+                {
+                    rgbValue = rgbValueTab[upperBound.Length - 1].Split('-');
+                    brushReturn.Color = Color.FromArgb(transparence, Convert.ToInt32(rgbValue[0]), Convert.ToInt32(rgbValue[1]), Convert.ToInt32(rgbValue[2]));
+                    break;
+                }
+
+                else
+                {
+                    if (i != 0 && i != upperBound.Length - 1)
+                    {
+                        if (val < upperBound[i] && val >= upperBound[i + 1])
+                        {
+                            rgbValue = rgbValueTab[i].Split('-');
+                            brushReturn.Color = Color.FromArgb(transparence, Convert.ToInt32(rgbValue[0]), Convert.ToInt32(rgbValue[1]), Convert.ToInt32(rgbValue[2]));
+                            break;
+                        }
+                    }
+                }
+            }
+            return brushReturn;
+        }
+
+        #region Gestion évènement
+
+        private void mouseMove(object sender, EventArgs e)
+        {
+            int x = 0;
+            int y = 0;
+            int positiony = (((this.PointToClient(Cursor.Position).Y) / (this.Height / 13)) + 1);
+            int positionx = (((this.PointToClient(Cursor.Position).X) / (this.Width / 12)));
+            double result = 0;
+
+            if (m_indexMoisEnCours != positionx && m_commencerDessin && positionx <= m_moisEnCours)
+            {
+                m_indexMoisEnCours = positionx;
+
+                if (positionx + m_indexMoisDebut > 12)
+                {
+                    m_formParent.changerMoisGrasGraphique(-(12 - m_indexMoisDebut) + (positionx) - 1);
+                }
+
+                else
+                {
+                    m_formParent.changerMoisGrasGraphique(positionx + m_indexMoisDebut - 1);
+                }
+
+            }
+
+            if ((positiony < 14) && (positiony > 0) && (positionx >= 0) && (positionx < 13))
+            {
+
+                if (m_commencerDessin && positionx <= m_moisEnCours)
+                {
+                   // m_toolTip.Visible = true;
+                    //m_labelToolTip.Visible = true;
+
+                    if (positionx + m_indexMoisDebut > 12)
+                    {
+                        result = Convert.ToDouble(m_tableau[positiony + m_typeSol * 14, -(12 - m_indexMoisDebut) + (positionx)]);
+                    }
+
+                    else
+                    {
+                        result = Convert.ToDouble(m_tableau[positiony + m_typeSol * 14, positionx + m_indexMoisDebut]);
+                    }
+
+                    m_labelToolTip.Text = string.Format("temperature:{0: 0.00}", result);
+
+                    if (positionx < 10)
+                    {
+                        x = this.PointToClient(Cursor.Position).X + 5;
+                        y = this.PointToClient(Cursor.Position).Y;
+                    }
+
+                    else
+                    {
+                        x = this.PointToClient(Cursor.Position).X - m_toolTip.Size.Width - 5;
+                        y = this.PointToClient(Cursor.Position).Y;
+                    }
+
+                    if (y + m_toolTip.Size.Height + 20>= this.Size.Height)
+                    {
+                        y = this.Size.Height - m_toolTip.Size.Height - 20;
+                    }
+
+                    m_toolTip.Location = new Point(x, y + 20);
+                    this.invalidateControl();
+                }
+
+                else
+                {
+                    m_toolTip.Visible = false;
+                    m_labelToolTip.Visible = false;
+                }
+
+            }
+
+        }
+
+        private void mouseEnter(object sender, EventArgs e)
+        {
+            if (m_commencerDessin)
+            {
+                int positiony = (((this.PointToClient(Cursor.Position).Y) / (this.Height / 13)) + 1);
+                int positionx = (((this.PointToClient(Cursor.Position).X) / (this.Width / 12)));
+                //m_toolTip.Visible = true;
+                //m_labelToolTip.Visible = true;
+
+                m_indexMoisEnCours = positionx;
+                if (positionx <= m_moisEnCours)
+                {
+                    if (positionx + m_indexMoisDebut > 12)
+                    {
+                        m_formParent.changerMoisGrasGraphique(-(12 - m_indexMoisDebut) + (positionx) - 1);
+                    }
+
+                    else
+                    {
+                        m_formParent.changerMoisGrasGraphique(positionx + m_indexMoisDebut - 1);
+                    }
+                }
+            }
+        }
+
+
+        private void mouseLeave(object sender, EventArgs e)
+        {
+            m_toolTip.Visible = false;
+            m_labelToolTip.Visible = false;
+            m_formParent.annulerMoisGrasGraphique();
+        }
+
+        #endregion
+
+
+
+    }
+
+
+}

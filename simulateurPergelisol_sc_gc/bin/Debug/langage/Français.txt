@@ -1,0 +1,12 @@
+Village;Village;Akulivik;Aupaluk;Inukjuak;Ivujivik;Kangiqsualujjuaq;Kangiqsujuaq;Kangirsuk;Kuujjuaq;Puvirnituq;Quaqtaq;Salluit;Tasiujaq;Umiujaq;
+Type de sol;Type de sol;Argile;Tourbe;Roc;Sable;Till;
+Couverture;Couverture;Aucun;Lichen;Arbuste bas;Arbuste haut;
+Options;Options;
+Bouton;Démarrer;Réinitialiser;Fin;
+FormOptions;
+lblMoisDebut;Mois de départ;
+comboxBoxMois;Octobre;Novembre;Décembre;Janvier;Février;Mars;Avril;Mai;Juin;Juillet;Août;Septembre;
+lblVitesseSim;Vitesse de la simulation;
+lblOpacite;Opacité température au sol;
+lblLangue;Langue;Français;Anglais;
+nomGraphe;Température de l'air en fonction du mois;
