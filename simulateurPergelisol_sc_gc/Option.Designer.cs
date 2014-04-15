@@ -29,16 +29,16 @@
         private void InitializeComponent()
         {
             this.groupBoxOptions = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.hScrollBar2 = new System.Windows.Forms.HScrollBar();
+            this.label1 = new System.Windows.Forms.Label();
+            this.hScrollBar1 = new System.Windows.Forms.HScrollBar();
             this.comboBoxLangue = new System.Windows.Forms.ComboBox();
             this.labelLangue = new System.Windows.Forms.Label();
             this.labelOpacite = new System.Windows.Forms.Label();
             this.labelVitSimulation = new System.Windows.Forms.Label();
             this.comboBoxMoisDebut = new System.Windows.Forms.ComboBox();
             this.labelMoisDebut = new System.Windows.Forms.Label();
-            this.hScrollBar1 = new System.Windows.Forms.HScrollBar();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.hScrollBar2 = new System.Windows.Forms.HScrollBar();
             this.groupBoxOptions.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -60,6 +60,49 @@
             this.groupBoxOptions.TabIndex = 0;
             this.groupBoxOptions.TabStop = false;
             this.groupBoxOptions.Text = "Options";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.SystemColors.Window;
+            this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label2.Location = new System.Drawing.Point(199, 52);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(21, 15);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "10";
+            // 
+            // hScrollBar2
+            // 
+            this.hScrollBar2.LargeChange = 1;
+            this.hScrollBar2.Location = new System.Drawing.Point(229, 54);
+            this.hScrollBar2.Maximum = 20;
+            this.hScrollBar2.Name = "hScrollBar2";
+            this.hScrollBar2.Size = new System.Drawing.Size(139, 15);
+            this.hScrollBar2.TabIndex = 9;
+            this.hScrollBar2.Value = 12;
+            this.hScrollBar2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar2_Scroll);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.SystemColors.Window;
+            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label1.Location = new System.Drawing.Point(199, 107);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(27, 15);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "255";
+            // 
+            // hScrollBar1
+            // 
+            this.hScrollBar1.LargeChange = 1;
+            this.hScrollBar1.Location = new System.Drawing.Point(229, 109);
+            this.hScrollBar1.Maximum = 255;
+            this.hScrollBar1.Name = "hScrollBar1";
+            this.hScrollBar1.Size = new System.Drawing.Size(139, 15);
+            this.hScrollBar1.TabIndex = 7;
+            this.hScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar1_Scroll);
             // 
             // comboBoxLangue
             // 
@@ -116,48 +159,6 @@
             this.labelMoisDebut.Size = new System.Drawing.Size(35, 13);
             this.labelMoisDebut.TabIndex = 0;
             this.labelMoisDebut.Text = "label1";
-            // 
-            // hScrollBar1
-            // 
-            this.hScrollBar1.Location = new System.Drawing.Point(229, 109);
-            this.hScrollBar1.Maximum = 255;
-            this.hScrollBar1.Name = "hScrollBar1";
-            this.hScrollBar1.Size = new System.Drawing.Size(139, 13);
-            this.hScrollBar1.TabIndex = 7;
-            this.hScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar1_Scroll);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.SystemColors.Window;
-            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label1.Location = new System.Drawing.Point(199, 107);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(27, 15);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "255";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.SystemColors.Window;
-            this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label2.Location = new System.Drawing.Point(199, 52);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(21, 15);
-            this.label2.TabIndex = 10;
-            this.label2.Text = "10";
-            // 
-            // hScrollBar2
-            // 
-            this.hScrollBar2.LargeChange = 2;
-            this.hScrollBar2.Location = new System.Drawing.Point(229, 54);
-            this.hScrollBar2.Maximum = 20;
-            this.hScrollBar2.Name = "hScrollBar2";
-            this.hScrollBar2.Size = new System.Drawing.Size(139, 13);
-            this.hScrollBar2.TabIndex = 9;
-            this.hScrollBar2.Value = 12;
-            this.hScrollBar2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar2_Scroll);
             // 
             // Option
             // 

@@ -112,7 +112,7 @@ namespace simulateurPergelisol_alpha_0._1
         private void hScrollBar2_Scroll(object sender, ScrollEventArgs e)
         {
             label2.Text = "" + hScrollBar2.Value;
-            m_formParent.changerVitesseSim(hScrollBar2.Value+12);
+            m_formParent.changerVitesseSim(31-hScrollBar2.Value);
         }
 
 

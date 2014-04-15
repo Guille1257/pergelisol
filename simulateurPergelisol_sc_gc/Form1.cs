@@ -114,7 +114,12 @@ namespace simulateurPergelisol_alpha_0._1
             genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
             this.panelTableau.Controls.Remove(m_tableauActif);
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
-
+            if (m_finiTracer)
+            {
+                m_overrideSimulation = true;
+                m_simulation = new Thread(this.sequenceDessin);
+                m_simulation.Start();
+            }
         }
 
         public void changerVitesseSim(int i)
@@ -156,6 +161,12 @@ namespace simulateurPergelisol_alpha_0._1
                     m_tableauActif.changerSolType(3);
                     m_graphique.switchBackground(3);
                     break;
+            }
+            if (m_finiTracer)
+            {
+                m_overrideSimulation = true;
+                m_simulation = new Thread(this.sequenceDessin);
+                m_simulation.Start();
             }
         }
 
@@ -527,6 +538,7 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 m_formOption.Visible = true;
             }
+            Application.OpenForms["Option"].BringToFront();
         }
 
         private void ToolStripMenuItem_click(object sender, EventArgs e)
@@ -868,7 +880,7 @@ namespace simulateurPergelisol_alpha_0._1
                         y = this.Size.Height - m_toolTip.Size.Height - 20;
                     }
 
-                    m_toolTip.Location = new Point(x, y + 20);
+              //      m_toolTip.Location = new Point(x, y + 20);
                     this.invalidateControl();
                 }
 
