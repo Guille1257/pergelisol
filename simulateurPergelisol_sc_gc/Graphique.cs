@@ -109,6 +109,7 @@ namespace simulateurPergelisol_alpha_0._1
                     m_pointX[i] = nomPointX[i];
                 }
                 calculPopriete();
+                creerImageBackground();
                 bufferNouveauGraphique();
             }
         }

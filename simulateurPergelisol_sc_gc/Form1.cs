@@ -68,9 +68,6 @@ namespace simulateurPergelisol_alpha_0._1
             m_langue = "Français";
             chargerLangage(m_langue);
 
-            m_writeData = new dataWriter(new Point(192, 291), new Size(102, 37));
-            panelTableau.Controls.Add(m_writeData);
-
             //form option
             m_formOption = new Option(this, m_langue, m_moisDebut);
 
@@ -94,6 +91,11 @@ namespace simulateurPergelisol_alpha_0._1
             m_finiTracer = true;
             this.panelGraphique.BackColor = Color.AliceBlue;
             //m_graphique.Visible = false;
+
+
+            m_writeData = new dataWriter(new Point(m_tableauActif.Location.X, 291), new Size(130, 37));
+            panelTableau.Controls.Add(m_writeData);
+            m_writeData.Visible = false;
 
         }
 
@@ -174,6 +176,11 @@ namespace simulateurPergelisol_alpha_0._1
                 m_simulation = new Thread(this.sequenceDessin);
                 m_simulation.Start();
             }
+        }
+
+        public void changerDataToolTip(double temp, double prof)
+        {
+            m_writeData.updataData(temp, prof);
         }
 
         #endregion
@@ -494,7 +501,7 @@ namespace simulateurPergelisol_alpha_0._1
                 m_overrideSimulation = false;
                 m_simulation = new Thread(this.sequenceDessin);
                 m_simulation.Start();
-
+                m_writeData.Visible = true;
             }
         }
 
@@ -503,6 +510,7 @@ namespace simulateurPergelisol_alpha_0._1
 
             m_overrideSimulation = true;
             m_pasTracer = false;
+            m_writeData.Visible = true;
 
             if (m_finiTracer)
             {
@@ -524,6 +532,7 @@ namespace simulateurPergelisol_alpha_0._1
         {
             clearSimulation();
             m_pasTracer = true;
+            m_writeData.Visible = false;
             try
             {
                 m_simulation.Abort();
@@ -889,7 +898,7 @@ namespace simulateurPergelisol_alpha_0._1
                     }
 
               //      m_toolTip.Location = new Point(x, y + 20);
-                    this.invalidateControl();
+                    m_formParent.changerDataToolTip(result, 0);
                 }
 
                 else
@@ -949,6 +958,8 @@ namespace simulateurPergelisol_alpha_0._1
         {
             this.Size = grosseur;
             this.Location = position;
+            m_temp = 10.5;
+            m_profondeur = -1.25;
             m_francais = true;
         }
 
@@ -956,6 +967,9 @@ namespace simulateurPergelisol_alpha_0._1
         {
             m_temp = temp;
             m_profondeur = profondeur;
+            this.Invalidate();
+            this.Update();
+            this.Refresh();
         }
 
         public void changerLangage(int i)
@@ -974,8 +988,13 @@ namespace simulateurPergelisol_alpha_0._1
         {
             base.OnPaint(pe);
             Pen contour = new Pen(Brushes.Black);
-            Font writing = new Font(FontFamily.GenericSansSerif, 8);
-            pe.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 4,130,255)), new Rectangle(0, 0, this.Size.Width, this.Size.Height));
+            Font writing = new Font(FontFamily.GenericSansSerif, 10);
+
+            if(m_temp < 0)
+                pe.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 4,130,255)), new Rectangle(0, 0, this.Size.Width, this.Size.Height));
+            else
+                pe.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 224, 205, 14)), new Rectangle(0, 0, this.Size.Width, this.Size.Height));
+
             pe.Graphics.DrawLine(contour, 0, 0, this.Size.Width, 0);
             pe.Graphics.DrawLine(contour, 0, 0, 0, this.Size.Height);
             pe.Graphics.DrawLine(contour, this.Size.Width - 1, 0, this.Size.Width - 1, this.Size.Height);
@@ -983,7 +1002,10 @@ namespace simulateurPergelisol_alpha_0._1
 
             if (m_francais)
             {
-               // pe.Graphics.DrawString("Température : 0", writing, 
+ 
+                    pe.Graphics.DrawString(string.Format("Température: {0: 0.00}", m_temp), writing, new SolidBrush(Color.Black), new Point(1, 0));
+                    pe.Graphics.DrawString(string.Format("Profondeur: {0: 0.00}", m_profondeur), writing, new SolidBrush(Color.Black), new Point(1, 20));
+
             }
 
         }

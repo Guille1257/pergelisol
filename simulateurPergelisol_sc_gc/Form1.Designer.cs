@@ -55,7 +55,7 @@
             // 
             // buttonDemarrer
             // 
-            this.buttonDemarrer.Location = new System.Drawing.Point(408, 291);
+            this.buttonDemarrer.Location = new System.Drawing.Point(347, 289);
             this.buttonDemarrer.Name = "buttonDemarrer";
             this.buttonDemarrer.Size = new System.Drawing.Size(102, 37);
             this.buttonDemarrer.TabIndex = 3;
@@ -103,7 +103,7 @@
             // 
             // buttonFin
             // 
-            this.buttonFin.Location = new System.Drawing.Point(516, 291);
+            this.buttonFin.Location = new System.Drawing.Point(455, 289);
             this.buttonFin.Name = "buttonFin";
             this.buttonFin.Size = new System.Drawing.Size(102, 37);
             this.buttonFin.TabIndex = 3;
@@ -111,7 +111,7 @@
             // 
             // buttonDebut
             // 
-            this.buttonDebut.Location = new System.Drawing.Point(300, 291);
+            this.buttonDebut.Location = new System.Drawing.Point(239, 289);
             this.buttonDebut.Name = "buttonDebut";
             this.buttonDebut.Size = new System.Drawing.Size(102, 37);
             this.buttonDebut.TabIndex = 3;
