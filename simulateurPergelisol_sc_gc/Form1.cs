@@ -17,6 +17,7 @@ namespace simulateurPergelisol_alpha_0._1
     {
         private Graphique m_graphique;
         private panelTransparent m_tableauActif;
+        private dataWriter m_writeData;
 
         //Variables du menu
         private List<ToolStripMenuItem> m_listeVillage;
@@ -66,6 +67,9 @@ namespace simulateurPergelisol_alpha_0._1
             m_equivalentMois = new Dictionary<string, string>();
             m_langue = "Français";
             chargerLangage(m_langue);
+
+            m_writeData = new dataWriter(new Point(192, 291), new Size(102, 37));
+            panelTableau.Controls.Add(m_writeData);
 
             //form option
             m_formOption = new Option(this, m_langue, m_moisDebut);
@@ -770,8 +774,8 @@ namespace simulateurPergelisol_alpha_0._1
                        e.Graphics.DrawRectangle(pen, 0, 0, m_moisEnCours * m_espaceX, this.Size.Height - 1);
 
                     //draw tooltip
-                    e.Graphics.FillRectangle(tomatoBrush, new Rectangle(m_toolTip.Location, m_toolTip.Size));
-                    e.Graphics.DrawString(m_labelToolTip.Text, fontToolTip, new SolidBrush(Color.Black), new PointF(m_toolTip.Location.X, m_toolTip.Location.Y));
+                    //e.Graphics.FillRectangle(tomatoBrush, new Rectangle(m_toolTip.Location, m_toolTip.Size));
+                   // e.Graphics.DrawString(m_labelToolTip.Text, fontToolTip, new SolidBrush(Color.Black), new PointF(m_toolTip.Location.X, m_toolTip.Location.Y));
 
                     pen.Dispose();
                 }
@@ -932,7 +936,57 @@ namespace simulateurPergelisol_alpha_0._1
         }
 
         #endregion
+    }
 
+    public class dataWriter : PictureBox
+    {
+
+        private double m_temp;
+        private double m_profondeur;
+        private bool m_francais;
+
+        public dataWriter(Point position, Size grosseur)
+        {
+            this.Size = grosseur;
+            this.Location = position;
+            m_francais = true;
+        }
+
+        public void updataData(double temp, double profondeur)
+        {
+            m_temp = temp;
+            m_profondeur = profondeur;
+        }
+
+        public void changerLangage(int i)
+        {
+            if (i == 1)
+            {
+                m_francais = true;
+            }
+            else
+            {
+                m_francais = false;
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs pe)
+        {
+            base.OnPaint(pe);
+            Pen contour = new Pen(Brushes.Black);
+            Font writing = new Font(FontFamily.GenericSansSerif, 8);
+            pe.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 4,130,255)), new Rectangle(0, 0, this.Size.Width, this.Size.Height));
+            pe.Graphics.DrawLine(contour, 0, 0, this.Size.Width, 0);
+            pe.Graphics.DrawLine(contour, 0, 0, 0, this.Size.Height);
+            pe.Graphics.DrawLine(contour, this.Size.Width - 1, 0, this.Size.Width - 1, this.Size.Height);
+            pe.Graphics.DrawLine(contour, 0, this.Size.Height - 1, this.Size.Width, this.Size.Height - 1);
+
+            if (m_francais)
+            {
+               // pe.Graphics.DrawString("Température : 0", writing, 
+            }
+
+        }
 
 
     }
