@@ -290,12 +290,12 @@ namespace simulateurPergelisol_alpha_0._1
 
             if (tabTexte != null)
             {
-                indexTypeSol = Array.IndexOf(tabTexte, "\nType de sol");
-                indexCouverture = Array.IndexOf(tabTexte, "\nCouverture");
-                indexBouton = Array.IndexOf(tabTexte, "\nBouton");
-                indexOption = Array.IndexOf(tabTexte, "\nOptions");
-                indexNomMois = Array.IndexOf(tabTexte, "\ncomboxBoxMois");
-                indexNomGraphe = Array.IndexOf(tabTexte, "\nnomGraphe");
+                indexTypeSol = Array.IndexOf(tabTexte, "\r\nType de sol");
+                indexCouverture = Array.IndexOf(tabTexte, "\r\nCouverture");
+                indexBouton = Array.IndexOf(tabTexte, "\r\nBouton");
+                indexOption = Array.IndexOf(tabTexte, "\r\nOptions");
+                indexNomMois = Array.IndexOf(tabTexte, "\r\ncomboxBoxMois");
+                indexNomGraphe = Array.IndexOf(tabTexte, "\r\nnomGraphe");
 
                 //Chargement nom des villages
                 for (int i = 2; i < indexTypeSol; i++)
@@ -404,7 +404,7 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 using (StreamReader sr = new StreamReader("village/" + m_villageItem.Text + "/airTemperature.csv"))
                 {
-                    tabTexte = sr.ReadToEnd().Split(new string[] { ";", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    tabTexte = sr.ReadToEnd().Split(new string[] { ";", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                     sr.Close();
                 }
 
