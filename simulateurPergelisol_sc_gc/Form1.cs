@@ -29,7 +29,8 @@ namespace simulateurPergelisol_alpha_0._1
         //Variables gestion chargement
         private bool m_langueCharger,
                      m_overrideSimulation,
-                     m_finiTracer;
+                     m_finiTracer,
+                     m_pasTracer;
         private Dictionary<string, string> m_equivalentSol;
         private Dictionary<string, string> m_equivalentCouverture;
 
@@ -70,6 +71,7 @@ namespace simulateurPergelisol_alpha_0._1
             m_formOption = new Option(this, m_langue, m_moisDebut);
 
             //paramètre
+            m_pasTracer = true;
             m_vitesseSimulation = 20;
             
             m_villageItem = m_listeVillage[0];
@@ -114,7 +116,7 @@ namespace simulateurPergelisol_alpha_0._1
             genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
             this.panelTableau.Controls.Remove(m_tableauActif);
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
-            if (m_finiTracer)
+            if (!m_pasTracer)
             {
                 m_overrideSimulation = true;
                 m_simulation = new Thread(this.sequenceDessin);
@@ -162,7 +164,7 @@ namespace simulateurPergelisol_alpha_0._1
                     m_graphique.switchBackground(3);
                     break;
             }
-            if (m_finiTracer)
+            if (!m_pasTracer)
             {
                 m_overrideSimulation = true;
                 m_simulation = new Thread(this.sequenceDessin);
@@ -482,6 +484,7 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void button1_Click(object sender, EventArgs e)
         {
+            m_pasTracer = false;
             if (m_finiTracer)
             {
                 m_overrideSimulation = false;
@@ -495,7 +498,7 @@ namespace simulateurPergelisol_alpha_0._1
         {
 
             m_overrideSimulation = true;
-
+            m_pasTracer = false;
 
             if (m_finiTracer)
             {
@@ -516,6 +519,7 @@ namespace simulateurPergelisol_alpha_0._1
         private void buttonDebut_Click(object sender, EventArgs e)
         {
             clearSimulation();
+            m_pasTracer = true;
             try
             {
                 m_simulation.Abort();

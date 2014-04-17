@@ -66,7 +66,7 @@ namespace simulateurPergelisol_alpha_0._1
             if (tabTexte != null)
             {
 
-                indexFormOption = Array.IndexOf(tabTexte, "\nFormOptions");
+                indexFormOption = Array.IndexOf(tabTexte, "\r\nFormOptions");
                 this.labelMoisDebut.Text = tabTexte[indexFormOption + 2];
                 this.labelVitSimulation.Text = tabTexte[indexFormOption + 17];
                 this.labelOpacite.Text = tabTexte[indexFormOption + 19];
