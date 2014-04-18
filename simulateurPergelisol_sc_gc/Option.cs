@@ -18,7 +18,7 @@ namespace simulateurPergelisol_alpha_0._1
         private String m_langue;
         private string m_MoisDebut;
 
-        public Option(Form1 parent, string langue, string MoisDebut)
+        public Option(Form1 parent, string langue, string MoisDebut, int vitesseSim, int opacite)
         {
             string[] files;
             m_formParent = parent;
@@ -35,7 +35,20 @@ namespace simulateurPergelisol_alpha_0._1
                 this.comboBoxLangue.Items.Add(files[i]);
             }
 
+            comboBoxLangue.SelectedIndex = -1;
+            comboBoxLangue.Text = langue;
+
+
             chargerLangage();
+
+            comboBoxMoisDebut.SelectedIndex = -1;
+            comboBoxMoisDebut.Text = MoisDebut;
+
+            label1.Text = opacite.ToString() ;
+            label2.Text = vitesseSim.ToString();
+            hScrollBar1.Value = opacite;
+            hScrollBar2.Value = vitesseSim;
+
         }
 
 
@@ -89,31 +102,33 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void comboBoxLangue_SelectedIndexChanged(object sender, EventArgs e)
         {
-            m_langue = comboBoxLangue.Text;
-            chargerLangage();
-            m_formParent.changerLangue(m_langue);
-            comboBoxLangue.SelectedText = m_langue;
+                m_langue = comboBoxLangue.Text;
+                chargerLangage();
+                m_formParent.changerLangue(m_langue);
+                comboBoxLangue.SelectedText = m_langue;
         }
 
         private void comboBoxMoisDebut_SelectedIndexChanged(object sender, EventArgs e)
         {
-            m_MoisDebut = comboBoxMoisDebut.Text;
-            m_formParent.changerMoisDebut(m_MoisDebut);
+                m_MoisDebut = comboBoxMoisDebut.Text;
+                m_formParent.changerMoisDebut(m_MoisDebut);
         }
-
-        #endregion
 
         private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
-            label1.Text = ""+hScrollBar1.Value;
+            label1.Text = "" + hScrollBar1.Value;
             m_formParent.changerOpacite(hScrollBar1.Value);
         }
 
         private void hScrollBar2_Scroll(object sender, ScrollEventArgs e)
         {
             label2.Text = "" + hScrollBar2.Value;
-            m_formParent.changerVitesseSim(31-hScrollBar2.Value);
+            m_formParent.changerVitesseSim(31 - hScrollBar2.Value);
         }
+
+        #endregion
+
+
 
 
     }

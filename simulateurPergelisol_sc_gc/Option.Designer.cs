@@ -112,7 +112,7 @@
             this.comboBoxLangue.Name = "comboBoxLangue";
             this.comboBoxLangue.Size = new System.Drawing.Size(121, 21);
             this.comboBoxLangue.TabIndex = 6;
-            this.comboBoxLangue.SelectedIndexChanged += new System.EventHandler(this.comboBoxLangue_SelectedIndexChanged);
+            this.comboBoxLangue.SelectionChangeCommitted += new System.EventHandler(this.comboBoxLangue_SelectedIndexChanged);
             // 
             // labelLangue
             // 
@@ -149,7 +149,7 @@
             this.comboBoxMoisDebut.Name = "comboBoxMoisDebut";
             this.comboBoxMoisDebut.Size = new System.Drawing.Size(121, 21);
             this.comboBoxMoisDebut.TabIndex = 1;
-            this.comboBoxMoisDebut.SelectedIndexChanged += new System.EventHandler(this.comboBoxMoisDebut_SelectedIndexChanged);
+            this.comboBoxMoisDebut.SelectionChangeCommitted += new System.EventHandler(this.comboBoxMoisDebut_SelectedIndexChanged);
             // 
             // labelMoisDebut
             // 

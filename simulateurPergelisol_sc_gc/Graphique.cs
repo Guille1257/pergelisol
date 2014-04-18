@@ -567,106 +567,14 @@ namespace simulateurPergelisol_alpha_0._1
             m_valGraduationX = 1; //un mois à la fois
             m_graduationPixelX = (float)(m_grandeurPixelAxeX / 11); // 11 - 0 = deltaX
 
-
-            if (m_grandeurPixelAxeY / m_deltaY > graduationLIMIT)
-            {
-                m_valGraduationY = 1;
-                m_graduationPixelY = (float)(m_grandeurPixelAxeY / m_deltaY);
-            }
-
-            else
-            {
-                m_graduationPixelY = graduationLIMIT;
-                m_valGraduationY = (int)(graduationLIMIT / (m_grandeurPixelAxeY / m_deltaY)) + 1; //+1 pour avoir un nombre entier valide comme pas de grad
-            }
+            m_valGraduationY = 7;
+            m_graduationPixelY = (int)(m_grandeurPixelAxeY / m_valGraduationY);
 
             //Nb de pixel utilisé pour chaque quadrant
-            nbPixelQuadUn = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMaxY));
-            nbPixelQuadQuatre = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMinY));
+            nbPixelQuadUn = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(14));
+            nbPixelQuadQuatre = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(-28));
 
-            if (m_grandeurPixelAxeY - (nbPixelQuadUn + nbPixelQuadQuatre) > (2 * m_graduationPixelY))
-            {
-                while (m_grandeurPixelAxeY - (nbPixelQuadUn + nbPixelQuadQuatre) > 2 * m_graduationPixelY) //Ajuste le pas de graduation pour avoir plus de précison
-                {
-                    m_graduationPixelY += 1;
-                    nbPixelQuadUn = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMaxY));
-                    nbPixelQuadQuatre = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMinY));
-                }
-
-                if (ptsMaxY % m_valGraduationY == 0)
-                {
-                    ptsMaxY += m_valGraduationY;
-                }
-
-                else
-                {
-                    while (ptsMaxY % m_valGraduationY != 0)
-                    {
-                        ptsMaxY += 1;
-                    }
-                }
-
-                if (ptsMinY % m_valGraduationY == 0)
-                {
-                    ptsMinY -= m_valGraduationY;
-                }
-
-                else
-                {
-                    while (ptsMinY % m_valGraduationY != 0)
-                    {
-                        ptsMinY -= 1;
-                    }
-                }
-
-                m_graduationPixelY -= 1;
-                nbPixelQuadUn = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMaxY));
-                nbPixelQuadQuatre = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMinY));
-                m_origine[1] = (m_margePixelY + nbPixelQuadUn);
-
-            }
-
-            else
-            {
-                while (m_grandeurPixelAxeY - (nbPixelQuadUn + nbPixelQuadQuatre) < 2 * m_graduationPixelY) //Diminue le pas de grad pour faire entrer le graphique
-                {
-                    m_graduationPixelY -= 1;
-                    nbPixelQuadUn = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMaxY));
-                    nbPixelQuadQuatre = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMinY));
-                }
-
-                if (ptsMaxY % m_valGraduationY == 0)
-                {
-                    ptsMaxY += m_valGraduationY;
-                }
-
-                else
-                {
-                    while (ptsMaxY % m_valGraduationY != 0)
-                    {
-                        ptsMaxY += 1;
-                    }
-                }
-
-                if (ptsMinY % m_valGraduationY == 0)
-                {
-                    ptsMinY -= m_valGraduationY;
-                }
-
-                else
-                {
-                    while (ptsMinY % m_valGraduationY != 0)
-                    {
-                        ptsMinY -= 1;
-                    }
-                }
-
-                m_graduationPixelY -= 1;
-                nbPixelQuadUn = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMaxY));
-                nbPixelQuadQuatre = (float)((m_graduationPixelY / m_valGraduationY) * Math.Abs(ptsMinY));
-                m_origine[1] = (m_margePixelY + nbPixelQuadUn);
-
-            }
+            m_origine[1] = (m_margePixelY + nbPixelQuadUn);
 
         }
 
@@ -678,8 +586,8 @@ namespace simulateurPergelisol_alpha_0._1
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             Pen pen = new System.Drawing.Pen(Brushes.Black, 1F);
-            Font fontGraduation = new Font(FontFamily.GenericSansSerif, 8);
-            Font fontTitre = new Font(FontFamily.GenericSansSerif, 10);
+            Font fontGraduation = new Font(FontFamily.GenericSansSerif, 10);
+            Font fontTitre = new Font(FontFamily.GenericSansSerif, 12);
             StringFormat formatGraduation = new StringFormat();
             SolidBrush brushPoint = new SolidBrush(Color.Black);
             formatGraduation.Alignment = StringAlignment.Far;
@@ -765,12 +673,12 @@ namespace simulateurPergelisol_alpha_0._1
 
             if (String.Compare(texte, m_moisSurligner) == 0)
             {
-                fontGraduation = new Font(FontFamily.GenericSansSerif, 12);
+                fontGraduation = new Font(FontFamily.GenericSansSerif, 14);
             }
 
             else
             {
-                fontGraduation = new Font(FontFamily.GenericSansSerif, 8);
+                fontGraduation = new Font(FontFamily.GenericSansSerif, 10);
             }
 
             StringFormat formatGraduation = new StringFormat();
@@ -792,6 +700,8 @@ namespace simulateurPergelisol_alpha_0._1
 
             g.DrawString(texte, fontGraduation, Brushes.Black, new RectangleF(posX, posY, rect.Width, rect.Height));
             g.ResetTransform();
+            fontGraduation.Dispose();
+
         }
 
         #endregion

@@ -52,8 +52,6 @@ namespace simulateurPergelisol_alpha_0._1
         private int m_opacite;
 
 
-        private Panel test;
-
         public Form1()
         {
             InitializeComponent();
@@ -68,12 +66,11 @@ namespace simulateurPergelisol_alpha_0._1
             m_langue = "Français";
             chargerLangage(m_langue);
 
-            //form option
-            m_formOption = new Option(this, m_langue, m_moisDebut);
 
             //paramètre
             m_pasTracer = true;
             m_vitesseSimulation = 20;
+            m_opacite = 200;
             
             m_villageItem = m_listeVillage[0];
             m_coverTypeItem = m_listeCoverType[0];
@@ -93,7 +90,11 @@ namespace simulateurPergelisol_alpha_0._1
             //m_graphique.Visible = false;
 
 
-            m_writeData = new dataWriter(new Point(m_tableauActif.Location.X, 291), new Size(130, 37));
+            //form option
+            m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
+    
+
+            m_writeData = new dataWriter(new Point(m_tableauActif.Location.X, 373), new Size(148, 37));
             panelTableau.Controls.Add(m_writeData);
             m_writeData.Visible = false;
 
@@ -133,13 +134,14 @@ namespace simulateurPergelisol_alpha_0._1
         public void changerVitesseSim(int i)
         {
             m_vitesseSimulation = i;
-            
         }
 
         public void changerOpacite(int i)
         {
+            m_opacite = i;
             this.m_tableauActif.changerOpacite(i);
         }
+
         public void changerMoisDebut(string i)
         {
             m_moisDebut = i;
@@ -181,6 +183,11 @@ namespace simulateurPergelisol_alpha_0._1
         public void changerDataToolTip(double temp, double prof)
         {
             m_writeData.updataData(temp, prof);
+        }
+
+        public void toolTipVisible(bool i)
+        {
+            m_writeData.Visible = i;
         }
 
         #endregion
@@ -233,8 +240,6 @@ namespace simulateurPergelisol_alpha_0._1
 
         #region méthode initialisation du form
 
-
-
         private void initialiserBoutonSimulation()
         {
             this.buttonFin.Click += new System.EventHandler(this.buttonFin_Click);
@@ -254,7 +259,7 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void genererTableauActif(Point location, Size size)
         {
-            this.m_tableauActif = new panelTransparent(lecturetemp(), m_indexMoisDebut,this);
+            this.m_tableauActif = new panelTransparent(lecturetemp(), m_indexMoisDebut, m_opacite, this);
             this.m_tableauActif.Location = location;
             this.m_tableauActif.Size = size;
             this.m_tableauActif.Height -= 40;
@@ -501,7 +506,6 @@ namespace simulateurPergelisol_alpha_0._1
                 m_overrideSimulation = false;
                 m_simulation = new Thread(this.sequenceDessin);
                 m_simulation.Start();
-                m_writeData.Visible = true;
             }
         }
 
@@ -510,7 +514,6 @@ namespace simulateurPergelisol_alpha_0._1
 
             m_overrideSimulation = true;
             m_pasTracer = false;
-            m_writeData.Visible = true;
 
             if (m_finiTracer)
             {
@@ -525,14 +528,14 @@ namespace simulateurPergelisol_alpha_0._1
                 m_simulation = new Thread(this.sequenceDessin);
                 m_simulation.Start();
             }
-            panelTableau.Controls.Add(test);
+
         }
 
         private void buttonDebut_Click(object sender, EventArgs e)
         {
             clearSimulation();
             m_pasTracer = true;
-            m_writeData.Visible = false;
+
             try
             {
                 m_simulation.Abort();
@@ -548,7 +551,7 @@ namespace simulateurPergelisol_alpha_0._1
         {
             if (m_formOption.IsDisposed)
             {
-                m_formOption = new Option(this, m_langue, m_moisDebut);
+                m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
                 m_formOption.Visible = true;
             }
             else
@@ -566,10 +569,10 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 float[] coordY = new float[12];
                 string[] nomX = new string[12];
-                lireAirTemperature(ref coordY, ref nomX);
                 this.m_villageItem.CheckState = CheckState.Unchecked;                
                 temp.CheckState = CheckState.Checked;
                 this.m_villageItem = temp;
+                lireAirTemperature(ref coordY, ref nomX);
                 this.m_graphique.updateDonnee(coordY, nomX, "Température en fonction du mois");
                 this.m_tableauActif.changerDonne(lecturetemp());
             }
@@ -649,8 +652,7 @@ namespace simulateurPergelisol_alpha_0._1
     {
         private Form1 m_formParent;
         private string[,] m_tableau = new string[57, 14];
-        private PictureBox m_toolTip;
-        private Label m_labelToolTip;
+
         private float m_espaceX;
         private int m_moisEnCours,
                     m_typeSol;
@@ -659,35 +661,30 @@ namespace simulateurPergelisol_alpha_0._1
         private bool m_commencerDessin;
         private int m_indexMoisDebut;
         private int m_indexMoisEnCours;
-        private Bitmap m_toolTipBMP;
-        private int opacite = 200;
+
+        private int opacite;
+
+        private readonly double[] PROFONDEUR = new double[] { 0, -0.25, -0.5, -0.75, -1, -1.5, -2,-2.5, -3, -3.5, -4, -4.5, -5 };
+
         #region Constructeurs
 
-        public panelTransparent(string[,] tableau, int indexMoisDebut, Form1 parent)
+        public panelTransparent(string[,] tableau, int indexMoisDebut, int opac, Form1 parent)
             : base()
         {
             m_formParent = parent;
             m_tableau = tableau;
+            opacite = opac;
             m_indexMoisDebut = indexMoisDebut + 1;
             this.MouseEnter += new System.EventHandler(this.mouseEnter);
             this.MouseLeave += new System.EventHandler(this.mouseLeave);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mouseMove);
             m_moisEnCours = 0;
-            m_toolTip = new PictureBox();
-            m_toolTip.BackColor = Color.Tomato;
-            m_labelToolTip = new Label();
-            m_toolTip.Location = new Point(0, 0);
-            m_toolTip.Size = new Size(100, 30);
-            m_toolTip.Visible = false;
-            m_labelToolTip.Visible = false;
-            m_labelToolTip.Location = new Point(0, 0);
-            this.Controls.Add(m_toolTip);
-            m_toolTip.Controls.Add(m_labelToolTip);
+
             callBackDessin = new dessin(this.invalidateControl);
             this.BackColor = Color.Transparent;
             m_commencerDessin = false;
             m_indexMoisEnCours = -1; //valeur initilisation
-            m_toolTipBMP = new Bitmap(100, 30);
+
         }
 
         #endregion
@@ -717,6 +714,7 @@ namespace simulateurPergelisol_alpha_0._1
             this.Refresh();
             this.Update();
         }
+
         public void nettoyer()
         {
             m_commencerDessin = false;
@@ -838,11 +836,11 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void mouseMove(object sender, EventArgs e)
         {
-            int x = 0;
-            int y = 0;
+
             int positiony = (((this.PointToClient(Cursor.Position).Y) / (this.Height / 13)) + 1);
             int positionx = (((this.PointToClient(Cursor.Position).X) / (this.Width / 12)));
             double result = 0;
+
 
             if (m_indexMoisEnCours != positionx && m_commencerDessin && positionx <= m_moisEnCours)
             {
@@ -865,8 +863,7 @@ namespace simulateurPergelisol_alpha_0._1
 
                 if (m_commencerDessin && positionx <= m_moisEnCours)
                 {
-                   // m_toolTip.Visible = true;
-                    //m_labelToolTip.Visible = true;
+                    m_formParent.toolTipVisible(true);
 
                     if (positionx + m_indexMoisDebut > 12)
                     {
@@ -878,33 +875,13 @@ namespace simulateurPergelisol_alpha_0._1
                         result = Convert.ToDouble(m_tableau[positiony + m_typeSol * 14, positionx + m_indexMoisDebut]);
                     }
 
-                    m_labelToolTip.Text = string.Format("temperature:{0: 0.00}", result);
 
-                    if (positionx < 10)
-                    {
-                        x = this.PointToClient(Cursor.Position).X + 5;
-                        y = this.PointToClient(Cursor.Position).Y;
-                    }
-
-                    else
-                    {
-                        x = this.PointToClient(Cursor.Position).X - m_toolTip.Size.Width - 5;
-                        y = this.PointToClient(Cursor.Position).Y;
-                    }
-
-                    if (y + m_toolTip.Size.Height + 20>= this.Size.Height)
-                    {
-                        y = this.Size.Height - m_toolTip.Size.Height - 20;
-                    }
-
-              //      m_toolTip.Location = new Point(x, y + 20);
-                    m_formParent.changerDataToolTip(result, 0);
+                    m_formParent.changerDataToolTip(result, PROFONDEUR[positiony - 1]);
                 }
 
                 else
                 {
-                    m_toolTip.Visible = false;
-                    m_labelToolTip.Visible = false;
+                    m_formParent.toolTipVisible(false);
                 }
 
             }
@@ -917,8 +894,6 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 int positiony = (((this.PointToClient(Cursor.Position).Y) / (this.Height / 13)) + 1);
                 int positionx = (((this.PointToClient(Cursor.Position).X) / (this.Width / 12)));
-                //m_toolTip.Visible = true;
-                //m_labelToolTip.Visible = true;
 
                 m_indexMoisEnCours = positionx;
                 if (positionx <= m_moisEnCours)
@@ -939,8 +914,7 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void mouseLeave(object sender, EventArgs e)
         {
-            m_toolTip.Visible = false;
-            m_labelToolTip.Visible = false;
+            m_formParent.toolTipVisible(false);
             m_formParent.annulerMoisGrasGraphique();
         }
 
@@ -950,9 +924,10 @@ namespace simulateurPergelisol_alpha_0._1
     public class dataWriter : PictureBox
     {
 
-        private double m_temp;
-        private double m_profondeur;
-        private bool m_francais;
+        private double  m_temp,
+                        m_profondeur;
+        private string  m_sTemp,
+                        m_sProfondeur;
 
         public dataWriter(Point position, Size grosseur)
         {
@@ -960,7 +935,8 @@ namespace simulateurPergelisol_alpha_0._1
             this.Location = position;
             m_temp = 10.5;
             m_profondeur = -1.25;
-            m_francais = true;
+            m_sTemp = "Température:";
+            m_sProfondeur = "Profondeur:";
         }
 
         public void updataData(double temp, double profondeur)
@@ -972,23 +948,16 @@ namespace simulateurPergelisol_alpha_0._1
             this.Refresh();
         }
 
-        public void changerLangage(int i)
-        {
-            if (i == 1)
-            {
-                m_francais = true;
-            }
-            else
-            {
-                m_francais = false;
-            }
-        }
-
         protected override void OnPaint(PaintEventArgs pe)
         {
             base.OnPaint(pe);
             Pen contour = new Pen(Brushes.Black);
             Font writing = new Font(FontFamily.GenericSansSerif, 10);
+            StringFormat formatWriting = new StringFormat();
+            formatWriting.Alignment = StringAlignment.Far;
+            SolidBrush writingBrush = new SolidBrush(Color.Black);
+            System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(new Bitmap(1, 1));
+            int largeurTemp = (int)graphics.MeasureString(m_sTemp, writing).Width;
 
             if(m_temp < 0)
                 pe.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 4,130,255)), new Rectangle(0, 0, this.Size.Width, this.Size.Height));
@@ -1000,16 +969,18 @@ namespace simulateurPergelisol_alpha_0._1
             pe.Graphics.DrawLine(contour, this.Size.Width - 1, 0, this.Size.Width - 1, this.Size.Height);
             pe.Graphics.DrawLine(contour, 0, this.Size.Height - 1, this.Size.Width, this.Size.Height - 1);
 
-            if (m_francais)
-            {
- 
-                    pe.Graphics.DrawString(string.Format("Température: {0: 0.00}", m_temp), writing, new SolidBrush(Color.Black), new Point(1, 0));
-                    pe.Graphics.DrawString(string.Format("Profondeur: {0: 0.00}", m_profondeur), writing, new SolidBrush(Color.Black), new Point(1, 20));
+            pe.Graphics.DrawString(m_sTemp, writing, writingBrush, new Rectangle(0, 1, largeurTemp + 2, 20), formatWriting);
+            pe.Graphics.DrawString(m_sProfondeur, writing, writingBrush, new Rectangle(0, 20, largeurTemp, 20), formatWriting);
 
-            }
+            pe.Graphics.DrawString(string.Format("{0: 0.00} °C", m_temp), writing, writingBrush, new Point(largeurTemp, 0));
+            pe.Graphics.DrawString(string.Format("{0: 0.00} m", m_profondeur), writing, writingBrush, new Point(largeurTemp, 20));
+
+
+            contour.Dispose();
+            writing.Dispose();
+            writingBrush.Dispose();
 
         }
-
 
     }
 

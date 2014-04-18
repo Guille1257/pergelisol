@@ -50,12 +50,12 @@
             this.panelGraphique.Location = new System.Drawing.Point(0, 24);
             this.panelGraphique.Margin = new System.Windows.Forms.Padding(0);
             this.panelGraphique.Name = "panelGraphique";
-            this.panelGraphique.Size = new System.Drawing.Size(799, 261);
+            this.panelGraphique.Size = new System.Drawing.Size(1008, 295);
             this.panelGraphique.TabIndex = 1;
             // 
             // buttonDemarrer
             // 
-            this.buttonDemarrer.Location = new System.Drawing.Point(347, 289);
+            this.buttonDemarrer.Location = new System.Drawing.Point(436, 373);
             this.buttonDemarrer.Name = "buttonDemarrer";
             this.buttonDemarrer.Size = new System.Drawing.Size(102, 37);
             this.buttonDemarrer.TabIndex = 3;
@@ -72,7 +72,7 @@
             this.menuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(799, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1008, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -103,7 +103,7 @@
             // 
             // buttonFin
             // 
-            this.buttonFin.Location = new System.Drawing.Point(455, 289);
+            this.buttonFin.Location = new System.Drawing.Point(544, 373);
             this.buttonFin.Name = "buttonFin";
             this.buttonFin.Size = new System.Drawing.Size(102, 37);
             this.buttonFin.TabIndex = 3;
@@ -111,7 +111,7 @@
             // 
             // buttonDebut
             // 
-            this.buttonDebut.Location = new System.Drawing.Point(239, 289);
+            this.buttonDebut.Location = new System.Drawing.Point(328, 373);
             this.buttonDebut.Name = "buttonDebut";
             this.buttonDebut.Size = new System.Drawing.Size(102, 37);
             this.buttonDebut.TabIndex = 3;
@@ -123,10 +123,10 @@
             this.panelTableau.Controls.Add(this.buttonDemarrer);
             this.panelTableau.Controls.Add(this.buttonFin);
             this.panelTableau.Controls.Add(this.buttonDebut);
-            this.panelTableau.Location = new System.Drawing.Point(0, 285);
+            this.panelTableau.Location = new System.Drawing.Point(0, 319);
             this.panelTableau.Margin = new System.Windows.Forms.Padding(0);
             this.panelTableau.Name = "panelTableau";
-            this.panelTableau.Size = new System.Drawing.Size(799, 332);
+            this.panelTableau.Size = new System.Drawing.Size(1008, 416);
             this.panelTableau.TabIndex = 4;
             this.panelTableau.Paint += new System.Windows.Forms.PaintEventHandler(this.panelTableau_draw);
             // 
@@ -135,11 +135,14 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.ClientSize = new System.Drawing.Size(799, 617);
+            this.ClientSize = new System.Drawing.Size(1008, 730);
             this.Controls.Add(this.panelTableau);
             this.Controls.Add(this.panelGraphique);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(1024, 768);
+            this.MinimumSize = new System.Drawing.Size(1024, 768);
             this.Name = "Form1";
             this.Text = "Simulateur";
             this.menuStrip1.ResumeLayout(false);
