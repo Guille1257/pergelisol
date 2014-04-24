@@ -91,11 +91,9 @@ namespace simulateurPergelisol_alpha_0._1
 
             //form option
             m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
-    
 
-            m_writeData = new dataWriter(new Point(m_tableauActif.Location.X, 373), new Size(148, 37));
-            panelTableau.Controls.Add(m_writeData);
-            m_writeData.Visible = false;
+            initialiserDatawrite();
+           
 
         }
 
@@ -244,6 +242,12 @@ namespace simulateurPergelisol_alpha_0._1
 
         #region méthode initialisation du form
 
+        private void initialiserDatawrite()
+        {
+            m_writeData = new dataWriter(new Point(m_tableauActif.Location.X, 373), new Size(148, 37));
+            panelTableau.Controls.Add(m_writeData);
+            m_writeData.Visible = false;
+        }
         private void initialiserBoutonSimulation()
         {
             this.buttonFin.Click += new System.EventHandler(this.buttonFin_Click);
@@ -286,8 +290,8 @@ namespace simulateurPergelisol_alpha_0._1
                 indexOption,
                 indexBouton,
                 indexNomMois,
-                indexNomGraphe;
-
+                indexNomGraphe,
+                indexDatawrite;
             try
             {
                 using (StreamReader sr = new StreamReader("langage/" + langage + ".txt", Encoding.GetEncoding("iso-8859-1")))
@@ -318,6 +322,7 @@ namespace simulateurPergelisol_alpha_0._1
                 indexOption = Array.IndexOf(tabTexte, "\r\nOptions");
                 indexNomMois = Array.IndexOf(tabTexte, "\r\ncomboxBoxMois");
                 indexNomGraphe = Array.IndexOf(tabTexte, "\r\nnomGraphe");
+                indexDatawrite=Array.IndexOf(tabTexte,"\r\ndatawrite");
 
                 //Chargement nom des villages
                 for (int i = 2; i < indexTypeSol; i++)
@@ -378,10 +383,17 @@ namespace simulateurPergelisol_alpha_0._1
                 this.typeDeSolToolStripMenuItem.Text = tabTexte[indexTypeSol + 1];
                 this.couvertureToolStripMenuItem.Text = tabTexte[indexCouverture + 1];
                 this.optionsToolStripMenuItem.Text = tabTexte[indexOption + 1];
+
+                //changement nom boutton
                 this.buttonDemarrer.Text = tabTexte[indexBouton + 1];
                 this.buttonDebut.Text = tabTexte[indexBouton + 2];
                 this.buttonFin.Text = tabTexte[indexBouton + 3];
-                this.m_langueCharger = true;
+
+                //changement datawrite
+          if(m_writeData!=null)
+                m_writeData.upLangue(tabTexte[indexDatawrite+1],tabTexte[indexDatawrite+2]);
+         
+               this.m_langueCharger = true;
                 m_nomGraphique = tabTexte[indexNomGraphe + 1];
                 m_moisDebut = m_equivalentMois.ElementAt(0).Key;
             }
@@ -951,6 +963,12 @@ namespace simulateurPergelisol_alpha_0._1
             this.Invalidate();
             this.Update();
             this.Refresh();
+        }
+        public void upLangue(string stemp, string sprofondeur)
+        {
+            m_sTemp = stemp;
+            m_sProfondeur = sprofondeur;
+            
         }
 
         protected override void OnPaint(PaintEventArgs pe)

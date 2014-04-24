@@ -10,3 +10,4 @@ lblVitesseSim;Vitesse de la simulation;
 lblOpacite;Opacité température au sol;
 lblLangue;Langue;Français;Anglais;
 nomGraphe;Température de l'air en fonction du mois;
+datawrite;Température:;Profondeur:;

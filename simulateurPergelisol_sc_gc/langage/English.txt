@@ -10,3 +10,4 @@ lblVitesseSim;Simulation speed;
 lblOpacite;Ground temperature opacity;
 lblLangue;Language;French;English;
 nomGraphe;Air temperature vs. month;
+datawrite;Temperature:;Depth:;
