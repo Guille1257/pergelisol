@@ -45,9 +45,9 @@ namespace simulateurPergelisol_alpha_0._1
             comboBoxMoisDebut.Text = MoisDebut;
 
             label1.Text = opacite.ToString() ;
-            label2.Text = vitesseSim.ToString();
+            label2.Text = (31 - vitesseSim).ToString();
             hScrollBar1.Value = opacite;
-            hScrollBar2.Value = vitesseSim;
+            hScrollBar2.Value = 31 - vitesseSim;
 
         }
 

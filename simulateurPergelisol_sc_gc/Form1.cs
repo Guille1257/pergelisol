@@ -10,6 +10,7 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Threading;
+using System.Timers;
 
 namespace simulateurPergelisol_alpha_0._1
 {
@@ -37,6 +38,7 @@ namespace simulateurPergelisol_alpha_0._1
 
         //Threading
         private Thread m_simulation;
+        private bool m_killThread;
 
         //String pour langage
         private string m_nomGraphique,
@@ -50,7 +52,6 @@ namespace simulateurPergelisol_alpha_0._1
         private int m_indexMoisDebut;
         private int m_vitesseSimulation;
         private int m_opacite;
-
 
         public Form1()
         {
@@ -78,17 +79,15 @@ namespace simulateurPergelisol_alpha_0._1
             m_villageItem.Checked = m_coverTypeItem.Checked = m_solItem.Checked = true;
             this.panelTableau.BackgroundImage = Image.FromFile("image/Argile.png");
             this.panelTableau.BackColor = Color.FromArgb(255, 111, 82, 64);
-            //88, 65, 51
+
             this.panelTableau.BackgroundImageLayout = ImageLayout.Stretch;
-            //genererSnowFall();
+
             genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
             initialiserBoutonSimulation();
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
 
             m_finiTracer = true;
             this.panelGraphique.BackColor = Color.AliceBlue;
-            //m_graphique.Visible = false;
-
 
             //form option
             m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
@@ -106,13 +105,13 @@ namespace simulateurPergelisol_alpha_0._1
         {
             if (indexMois >= 0)
             {
-                m_graphique.changerMoisGras(m_equivalentMois.ElementAt(indexMois).Key);
+                m_graphique.changerMoisGras(indexMois, m_equivalentMois.ElementAt(indexMois).Key);
             }
         }
 
         public void annulerMoisGrasGraphique()
         {
-            m_graphique.changerMoisGras(null);
+            m_graphique.changerMoisGras(12, null);
         }
 
         public void changerLangue(string langue)
@@ -197,8 +196,7 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void sequenceDessin()
         {
-            int vitesseTracage = m_vitesseSimulation,
-                dernierPoint,
+            int dernierPoint,
                 prochainPoint;
 
             m_finiTracer = false;
@@ -208,11 +206,11 @@ namespace simulateurPergelisol_alpha_0._1
 
             if (!m_overrideSimulation)
             {
-                while (prochainPoint < 12)
+                while (prochainPoint < 12 && !m_killThread)
                 {
                     dernierPoint = prochainPoint;
                     m_tableauActif.setProchainMois(prochainPoint);
-                    m_graphique.sequenceDessin(prochainPoint, vitesseTracage,false);
+                    m_graphique.sequenceDessin(prochainPoint, m_vitesseSimulation,false);
                     prochainPoint += 1;
                 }
 
@@ -223,7 +221,13 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 prochainPoint = 12;
                 m_tableauActif.setProchainMois(prochainPoint);
-                m_graphique.sequenceDessin(prochainPoint, vitesseTracage,true);
+                m_graphique.sequenceDessin(prochainPoint, m_vitesseSimulation, true);
+            }
+
+            if (m_killThread)
+            {
+                clearSimulation();
+                m_killThread = false;
             }
 
             m_finiTracer = true;
@@ -505,7 +509,7 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 m_overrideSimulation = false;
                 m_simulation = new Thread(this.sequenceDessin);
-                m_simulation.Start();
+                m_simulation.Start(); 
             }
         }
 
@@ -533,17 +537,18 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void buttonDebut_Click(object sender, EventArgs e)
         {
-            clearSimulation();
+            if (m_simulation.IsAlive)
+            {
+                m_killThread = true;
+                m_graphique.killSimulation();
+            }
+
+            else
+            {
+                clearSimulation();
+            }
+
             m_pasTracer = true;
-
-            try
-            {
-                m_simulation.Abort();
-            }
-            catch (Exception ep)
-            {
-
-            }
         }
 
 
@@ -983,6 +988,5 @@ namespace simulateurPergelisol_alpha_0._1
         }
 
     }
-
 
 }

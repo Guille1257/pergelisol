@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using System.Diagnostics;
 
 namespace simulateurPergelisol_alpha_0._1
 {
@@ -30,11 +31,11 @@ namespace simulateurPergelisol_alpha_0._1
                     m_prochainPoint;
 
         private Bitmap m_background,
-                       m_backGroundThread;
+                       m_imgPath;
+
+        private List<Bitmap> m_listeBackGroundIMG;
 
         private string m_nomGraphique;
-        private string m_imgPath;
-
         //Variable de points
         private float[] m_pointY;
         private string[] m_pointX;
@@ -44,9 +45,13 @@ namespace simulateurPergelisol_alpha_0._1
         private float m_zero,
                       m_coefficient;
 
+        private int   m_distanceDeuxPoints;
+
         private bool m_enterDeuxPoints,
                      m_overideTracage,
-                     m_tracer;
+                     m_tracer,
+                     m_test,
+                     m_killThread;
 
         private int m_compteur,
                     m_vitesseTrace;
@@ -57,21 +62,41 @@ namespace simulateurPergelisol_alpha_0._1
         private delegate void dessin();
         private dessin callBackDessin;
         private object lockSimThread;
+        private Stopwatch sw;
+
+        //Variable de dessin
+        private SolidBrush solidBlackBrush;
+        private Pen pen;
+        private Font fontGraduation;
+        private Font fontTitre;
+        private StringFormat formatGraduation;
+
+        private int m_currentMonthIndex;
 
         public Graphique(System.Drawing.Point location, System.Drawing.Size grosseur, float[] CoordPointY, string[] nomPointX, string nomGraphique)
         {
             InitializeComponent();
-            m_imgPath = "image/backgroundGraphe.png";
+            initVariableAffichage();
+            m_listeBackGroundIMG = new List<Bitmap>();
+
+
+            for (int i = 0; i < 13; i++)
+            {
+                m_listeBackGroundIMG.Add(new Bitmap(this.Size.Width, this.Size.Height));
+            }
+
+            m_imgPath = new Bitmap(Image.FromFile("image/backgroundGraphe.png"));
             m_nomGraphique = nomGraphique;
             m_pointY = CoordPointY;
             m_pointX = nomPointX;
             this.Size = grosseur;
             this.Location = location;
+            m_killThread = false;
             calculPopriete();
             creerImageBackground();
             callBackDessin = new dessin(invalidateControl);
             lockSimThread = new Object();
-            calculVitesseTracage();
+            sw = new Stopwatch();
         }
 
         public float[] getOrigine()
@@ -120,16 +145,16 @@ namespace simulateurPergelisol_alpha_0._1
             switch (type)
             {
                 case 0:
-                    m_imgPath = "image/backgroundGraphe.png";
+                    m_imgPath = new Bitmap(Image.FromFile("image/backgroundGraphe.png"));
                     break;
                 case 1:
-                    m_imgPath = "image/lichen.png";
+                    m_imgPath = new Bitmap(Image.FromFile("image/lichen.png"));
                     break;
                 case 2:
-                    m_imgPath = "image/low.png";
+                    m_imgPath = new Bitmap(Image.FromFile("image/low.png"));
                     break;
                 case 3:
-                    m_imgPath = "image/high.png";
+                    m_imgPath = new Bitmap(Image.FromFile("image/high.png"));
                     break;
             }
 
@@ -141,14 +166,20 @@ namespace simulateurPergelisol_alpha_0._1
         {
             m_tracer = false;
             m_dernierPoint = m_prochainPoint = 0;
-            this.Invoke(callBackDessin);
+            bufferNouveauGraphique();
         }
 
-        public void changerMoisGras(string mois)
+        public void changerMoisGras(int moisIndex, string moisString)
         {
-            m_moisSurligner = mois;
-            creerImageBackground();
+            m_currentMonthIndex = moisIndex;
+            m_moisSurligner = moisString;
+            /*creerImageBackground(); */
             bufferNouveauGraphique();
+        }
+
+        public void killSimulation()
+        {
+            m_killThread = true;
         }
 
         #region Méthode override
@@ -281,9 +312,9 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void calculVitesseTracage()
         {
-            long tickTime = DateTime.Now.Ticks;
-            bufferNouveauGraphique();
-            m_ticksSimulation = DateTime.Now.Ticks - tickTime;
+            m_test = true;
+
+            m_test = false;
         }
 
         private void invalidateControl()
@@ -298,29 +329,25 @@ namespace simulateurPergelisol_alpha_0._1
             m_tracer = true;
             m_overideTracage = overrideTracage;
 
-            if (prochainPoint == 1)
-            {
-                calculVitesseTracage();
-            }
+             calculVitesseTracage();
 
             if (!m_overideTracage)
             {
+                m_compteur = 0;
                 double lol = TimeSpan.FromTicks(m_ticksSimulation).TotalSeconds;
-                m_vitesseTrace = (int)((vitesseTrace/11) / TimeSpan.FromTicks(m_ticksSimulation).TotalSeconds);
+                m_vitesseTrace = 70;
                 m_dernierPoint = prochainPoint - 1;
                 m_prochainPoint = prochainPoint;
                 trouverRegle();
                 m_enterDeuxPoints = true;
 
-                while (m_compteur < m_vitesseTrace)
+                while (m_compteur < m_vitesseTrace && !m_killThread)
                 {
                     bufferNouveauGraphique();
                     m_compteur++;
                 }
 
-                m_compteur = 0;
                 m_enterDeuxPoints = false;
-
             }
 
             else
@@ -335,6 +362,12 @@ namespace simulateurPergelisol_alpha_0._1
                 bufferNouveauGraphique();
             }
 
+            if (m_killThread)
+            {
+                nettoyer();
+                m_killThread = false;
+            }
+
             m_overideTracage = true;
 
         }
@@ -342,21 +375,64 @@ namespace simulateurPergelisol_alpha_0._1
         private void bufferNouveauGraphique()
         {
             Bitmap buffer = new Bitmap(this.Size.Width, this.Size.Height);
+            Bitmap neige = new Bitmap(this.Size.Width, this.Size.Height);
 
             using (Graphics gDone = this.CreateGraphics())
             {
                 Graphics g = Graphics.FromImage(buffer);
-                if (m_tracer)
+                Graphics gNeige = Graphics.FromImage(neige);
+
+               /* gNeige.FillRectangle(new SolidBrush(Color.AliceBlue), new Rectangle(0, 0, this.Size.Width, this.Size.Height));
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i *5, 50 + m_compteur, 3, 3));
+                }
+
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 100 + m_compteur, 3, 3));
+                }
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 150 + m_compteur, 3, 3));
+                }
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 200 + m_compteur, 3, 3));
+                }
+
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 10 + m_compteur, 3, 3));
+                }
+
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 130 + m_compteur, 3, 3));
+                }
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 180 + m_compteur, 3, 3));
+                }
+                for (int i = 0; i < 200; i++)
+                {
+                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 220 + m_compteur, 3, 3));
+                } */
+
+                neige.MakeTransparent(Color.AliceBlue);
+
+                if (m_tracer || m_test)
                 {
                     g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
                     lock (lockSimThread)
                     {
-                        g.DrawImage(m_backGroundThread, new Point(0, 0));
+                        g.DrawImage(m_listeBackGroundIMG[m_currentMonthIndex], new Point(0, 0));
                     }
-                    SolidBrush brushPoint = new SolidBrush(Color.Black);
+
                     Pen pen = new Pen(Color.Black, 1);
                     Pen pen2 = new Pen(Color.Black, 2);
+                    SolidBrush bBrush = new SolidBrush(Color.Black);
                     float xCourant,
                           xProchain,
                           pointX1,
@@ -372,7 +448,7 @@ namespace simulateurPergelisol_alpha_0._1
 
                             if (i != m_prochainPoint)
                             {
-                                g.FillEllipse(brushPoint, m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i - 3,
+                                g.FillEllipse(bBrush, m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i - 3,
                             m_origine[1] - 3 - ((m_graduationPixelY / m_valGraduationY) * m_pointY[i]), 6, 6);
 
                                 g.DrawEllipse(pen, (m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i) - 3,
@@ -382,7 +458,7 @@ namespace simulateurPergelisol_alpha_0._1
                             if (i == m_prochainPoint && m_prochainPoint == m_pointY.Length - 1 && m_enterDeuxPoints == false)
                             {
 
-                                g.FillEllipse(brushPoint, m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i - 3,
+                                g.FillEllipse(bBrush, m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i - 3,
                                                 m_origine[1] - 3 - ((m_graduationPixelY / m_valGraduationY) * m_pointY[i]), 6, 6);
 
                                 g.DrawEllipse(pen, (m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i) - 3,
@@ -399,10 +475,11 @@ namespace simulateurPergelisol_alpha_0._1
                                     pointY1 = m_origine[1] - ((m_graduationPixelY / m_valGraduationY) * m_pointY[i - 1]);
                                     pointX2 = m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i;
                                     pointY2 = m_origine[1] - ((m_graduationPixelY / m_valGraduationY) * m_pointY[i]);
+
                                     calculNouveauXY(ref pointX1, ref pointY1, ref pointX2, ref pointY2);
 
-                                    xCourant = pointX1 + m_compteur * (m_graduationPixelX / m_vitesseTrace);
-                                    xProchain = pointX1 + (m_compteur + 1) * (m_graduationPixelX / m_vitesseTrace);
+                                    xCourant = pointX1 + m_compteur * (float)((float)m_graduationPixelX / (float)m_vitesseTrace);
+                                    xProchain = pointX1 + (m_compteur + 1) * (float)((float)m_graduationPixelX / (float)m_vitesseTrace);
 
                                     g.DrawLine(pen2, pointX1,
                                                      pointY1,
@@ -444,7 +521,7 @@ namespace simulateurPergelisol_alpha_0._1
                                 g.DrawLine(pen2, pointX1, pointY1, pointX2, pointY2);
                             }
 
-                            g.FillEllipse(brushPoint, m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i - 3,
+                            g.FillEllipse(bBrush, m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i - 3,
                                           m_origine[1] - 3 - ((m_graduationPixelY / m_valGraduationY) * m_pointY[i]), 6, 6);
 
                             g.DrawEllipse(pen, (m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i) - 3,
@@ -453,11 +530,16 @@ namespace simulateurPergelisol_alpha_0._1
                         }
                     }
 
-                    gDone.DrawImage(buffer, 0, 0);
+                    if (!m_test)
+                    {
+                        g.DrawImage(neige, 0, 0);
+                        gDone.DrawImage(buffer, 0, 0);
+                    }
+
                     buffer.Dispose();
                     gDone.Dispose();
                     g.Dispose();
-                    brushPoint.Dispose();
+                    bBrush.Dispose();
                     pen.Dispose();
                     pen2.Dispose();
                 }
@@ -467,17 +549,18 @@ namespace simulateurPergelisol_alpha_0._1
                     g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                     lock (lockSimThread)
                     {
-                        g.DrawImage(m_backGroundThread, new Point(0, 0));
+                        g.DrawImage(m_listeBackGroundIMG[m_currentMonthIndex], new Point(0, 0));
                     }
 
-                    gDone.DrawImage(buffer, 0, 0);
+                    if (!m_test)
+                        gDone.DrawImage(buffer, 0, 0);
+
                     buffer.Dispose();
                     gDone.Dispose();
                     g.Dispose();
                 }
 
             }
-
         }
 
         private void trouverRegle()
@@ -491,11 +574,12 @@ namespace simulateurPergelisol_alpha_0._1
             coordProchainPoint = new[]{m_margePixelX + (m_graduationPixelX / m_valGraduationX) * m_prochainPoint,
                                 m_origine[1] - ((m_graduationPixelY / m_valGraduationY) * m_pointY[m_prochainPoint])};
 
-
+            m_distanceDeuxPoints = (int)Math.Sqrt(Math.Pow(coordProchainPoint[0] - coordDernierPoint[0], 2) + Math.Pow(coordProchainPoint[1] - coordDernierPoint[1], 2));
             m_coefficient = (coordProchainPoint[1] - coordDernierPoint[1]) / (coordProchainPoint[0] - coordDernierPoint[0]);
             m_zero = coordDernierPoint[1] - m_coefficient * coordDernierPoint[0];
 
         }
+
 
         private void calculNouveauXY(ref float pointX1, ref float pointY1, ref float pointX2, ref float pointY2)
         {
@@ -519,6 +603,15 @@ namespace simulateurPergelisol_alpha_0._1
         #endregion
 
         #region Méthode d'initialisation
+
+        private void initVariableAffichage()
+        {
+            solidBlackBrush = new SolidBrush(Color.Black);
+            pen = new System.Drawing.Pen(Brushes.Black, 1F);
+            fontGraduation = new Font(FontFamily.GenericSansSerif, 10);
+            fontTitre = new Font(FontFamily.GenericSansSerif, 12);
+            formatGraduation = new StringFormat();
+        }
 
         private void calculPopriete()
         {
@@ -580,82 +673,85 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void creerImageBackground()
         {
-            m_background = new Bitmap(this.Size.Width, this.Size.Height);
-            Graphics g = Graphics.FromImage(m_background);
-            g.DrawImage(Image.FromFile(m_imgPath, true), 0, 0, this.Size.Width, this.Size.Height);
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-
-            Pen pen = new System.Drawing.Pen(Brushes.Black, 1F);
-            Font fontGraduation = new Font(FontFamily.GenericSansSerif, 10);
-            Font fontTitre = new Font(FontFamily.GenericSansSerif, 12);
-            StringFormat formatGraduation = new StringFormat();
-            SolidBrush brushPoint = new SolidBrush(Color.Black);
-            formatGraduation.Alignment = StringAlignment.Far;
-            float nbGraduationQuadUn,
-                nbGraduationQuadQuatre,
-                nbGraduationX,
-                grandeurBarreGrad = m_margePixelY / 4,
-                gradVal;
-
-            //nom graphique
-
-            SizeF rect = calculTailleString(m_nomGraphique, fontTitre);
-            g.DrawString(m_nomGraphique, fontTitre, new SolidBrush(Color.Black), new PointF(this.Size.Width / 2 - rect.Width / 2, 15));
-
-            //traçage des axes
-
-            g.DrawLine(pen, m_margePixelX - grandeurBarreGrad, m_origine[1], this.Size.Width - m_margePixelX, m_origine[1]); //x (0)
-            g.DrawLine(pen, m_margePixelX, m_origine[1] - nbPixelQuadUn, m_margePixelX, m_origine[1] + nbPixelQuadQuatre); //y
-
-
-            // traçage de la graduation en Y et écriture pas graduation
-
-            g.DrawString("0", fontGraduation, new SolidBrush(Color.Black), new RectangleF(m_margePixelX / 4, m_origine[1] - 7, m_margePixelX / 2, 50), formatGraduation);
-
-            nbGraduationQuadUn = (float)Math.Round((m_origine[1] - m_margePixelY) / m_graduationPixelY);
-            nbGraduationQuadQuatre = (float)(Math.Round((nbPixelQuadQuatre / m_graduationPixelY)));
-
-            for (int i = 1; i <= nbGraduationQuadUn; i++)
+            //Créé toutes les images (pour chaque mois en gras)
+            for (int a = 0; a < 13; a++)
             {
-                gradVal = i * m_valGraduationY;
+                m_listeBackGroundIMG[a] = new Bitmap(this.Size.Width, this.Size.Height);
+                Graphics g = Graphics.FromImage(m_listeBackGroundIMG[a]);
+                g.DrawImage(m_imgPath, 0, 0, this.Size.Width, this.Size.Height);
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
-                g.DrawString(gradVal.ToString(), fontGraduation, new SolidBrush(Color.Black), new RectangleF(m_margePixelX / 4, m_origine[1] - i * m_graduationPixelY - 7, m_margePixelX / 2, 25), formatGraduation);
-                g.DrawLine(pen, m_margePixelX - grandeurBarreGrad, m_origine[1] - i * m_graduationPixelY, m_margePixelX, m_origine[1] - i * m_graduationPixelY);
-                g.DrawLine(pen, m_margePixelX, m_origine[1] - i * m_graduationPixelY, this.Size.Width - m_margePixelX, m_origine[1] - i * m_graduationPixelY);
+                if (a != 12)
+                    m_moisSurligner = m_pointX[a];
+                else
+                    m_moisSurligner = null;
 
+                formatGraduation.Alignment = StringAlignment.Far;
+                float nbGraduationQuadUn,
+                    nbGraduationQuadQuatre,
+                    nbGraduationX,
+                    grandeurBarreGrad = m_margePixelY / 4,
+                    gradVal;
+
+                //nom graphique
+
+                SizeF rect = calculTailleString(m_nomGraphique, fontTitre);
+                g.DrawString(m_nomGraphique, fontTitre, new SolidBrush(Color.Black), new PointF(this.Size.Width / 2 - rect.Width / 2, 15));
+
+                //traçage des axes
+
+                g.DrawLine(pen, m_margePixelX - grandeurBarreGrad, m_origine[1], this.Size.Width - m_margePixelX, m_origine[1]); //x (0)
+                g.DrawLine(pen, m_margePixelX, m_origine[1] - nbPixelQuadUn, m_margePixelX, m_origine[1] + nbPixelQuadQuatre); //y
+
+
+                // traçage de la graduation en Y et écriture pas graduation
+
+                g.DrawString("0", fontGraduation, new SolidBrush(Color.Black), new RectangleF(m_margePixelX / 4, m_origine[1] - 7, m_margePixelX / 2, 50), formatGraduation);
+
+                nbGraduationQuadUn = (float)Math.Round((m_origine[1] - m_margePixelY) / m_graduationPixelY);
+                nbGraduationQuadQuatre = (float)(Math.Round((nbPixelQuadQuatre / m_graduationPixelY)));
+
+                for (int i = 1; i <= nbGraduationQuadUn; i++)
+                {
+                    gradVal = i * m_valGraduationY;
+
+                    g.DrawString(gradVal.ToString(), fontGraduation, new SolidBrush(Color.Black), new RectangleF(m_margePixelX / 4, m_origine[1] - i * m_graduationPixelY - 7, m_margePixelX / 2, 25), formatGraduation);
+                    g.DrawLine(pen, m_margePixelX - grandeurBarreGrad, m_origine[1] - i * m_graduationPixelY, m_margePixelX, m_origine[1] - i * m_graduationPixelY);
+                    g.DrawLine(pen, m_margePixelX, m_origine[1] - i * m_graduationPixelY, this.Size.Width - m_margePixelX, m_origine[1] - i * m_graduationPixelY);
+
+                }
+
+                for (int i = 1; i <= nbGraduationQuadQuatre; i++)
+                {
+                    gradVal = -(i * m_valGraduationY);
+                    g.DrawLine(pen, m_margePixelX - grandeurBarreGrad, m_origine[1] + i * m_graduationPixelY, m_margePixelX, m_origine[1] + i * m_graduationPixelY);
+                    g.DrawString(gradVal.ToString(), fontGraduation, new SolidBrush(Color.Black), new RectangleF(m_margePixelX / 4, m_origine[1] + i * m_graduationPixelY - 7, m_margePixelX / 2, 50), formatGraduation);
+                    g.DrawLine(pen, m_margePixelX, m_origine[1] + i * m_graduationPixelY, this.Size.Width - m_margePixelX, m_origine[1] + i * m_graduationPixelY);
+                }
+
+                // traçage de la graduation en X et écriture pas graduation
+                nbGraduationX = (float)Math.Round((m_grandeurPixelAxeX / m_graduationPixelX));
+                nbGraduationQuadQuatre = (float)(Math.Round((nbPixelQuadQuatre / m_graduationPixelY))); //Obligé de ré-écrire sinon MVS détecte une erreur (non initialisée)
+
+                for (int i = 0; i <= nbGraduationX; i++)
+                {
+                    g.DrawLine(pen, m_margePixelX + i * m_graduationPixelX, m_origine[1] + nbGraduationQuadQuatre * m_graduationPixelY + grandeurBarreGrad, m_margePixelX + i * m_graduationPixelX,
+                        m_origine[1] + nbGraduationQuadQuatre * m_graduationPixelY);
+                }
+
+                for (int i = 0; i <= nbGraduationX; i++)
+                {
+                    ecrireNomRotationAxeX(ref g, m_pointX[i], new[] { i * m_graduationPixelX + m_margePixelX, m_origine[1] + grandeurBarreGrad + nbGraduationQuadQuatre * m_graduationPixelY }, -25);
+                }
+
+                if (a == 12)
+                {
+                    m_background = new Bitmap(m_listeBackGroundIMG[a]);
+                }
+
+                //libère mémoire
+                g.Dispose();
             }
-
-            for (int i = 1; i <= nbGraduationQuadQuatre; i++)
-            {
-                gradVal = -(i * m_valGraduationY);
-                g.DrawLine(pen, m_margePixelX - grandeurBarreGrad, m_origine[1] + i * m_graduationPixelY, m_margePixelX, m_origine[1] + i * m_graduationPixelY);
-                g.DrawString(gradVal.ToString(), fontGraduation, new SolidBrush(Color.Black), new RectangleF(m_margePixelX / 4, m_origine[1] + i * m_graduationPixelY - 7, m_margePixelX / 2, 50), formatGraduation);
-                g.DrawLine(pen, m_margePixelX, m_origine[1] + i * m_graduationPixelY, this.Size.Width - m_margePixelX, m_origine[1] + i * m_graduationPixelY);
-            }
-
-            // traçage de la graduation en X et écriture pas graduation
-            nbGraduationX = (float)Math.Round((m_grandeurPixelAxeX / m_graduationPixelX));
-            nbGraduationQuadQuatre = (float)(Math.Round((nbPixelQuadQuatre / m_graduationPixelY))); //Obligé de ré-écrire sinon MVS détecte une erreur (non initialisée)
-
-            for (int i = 0; i <= nbGraduationX; i++)
-            {
-                g.DrawLine(pen, m_margePixelX + i * m_graduationPixelX, m_origine[1] + nbGraduationQuadQuatre * m_graduationPixelY + grandeurBarreGrad, m_margePixelX + i * m_graduationPixelX,
-                    m_origine[1] + nbGraduationQuadQuatre * m_graduationPixelY);
-            }
-
-            for (int i = 0; i <= nbGraduationX; i++)
-            {
-                ecrireNomRotationAxeX(ref g, m_pointX[i], new[] { i * m_graduationPixelX + m_margePixelX, m_origine[1] + grandeurBarreGrad + nbGraduationQuadQuatre * m_graduationPixelY }, -25);
-            }
-
-            m_backGroundThread = new Bitmap(m_background);
-            //libère mémoire
-            pen.Dispose();
-            fontGraduation.Dispose();
-            formatGraduation.Dispose();
-            brushPoint.Dispose();
-            g.Dispose();
-
         }
 
         private SizeF calculTailleString(string s, Font f)
