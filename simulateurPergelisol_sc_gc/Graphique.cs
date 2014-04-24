@@ -79,7 +79,6 @@ namespace simulateurPergelisol_alpha_0._1
             initVariableAffichage();
             m_listeBackGroundIMG = new List<Bitmap>();
 
-
             for (int i = 0; i < 13; i++)
             {
                 m_listeBackGroundIMG.Add(new Bitmap(this.Size.Width, this.Size.Height));
@@ -134,7 +133,6 @@ namespace simulateurPergelisol_alpha_0._1
                     m_pointX[i] = nomPointX[i];
                 }
                 calculPopriete();
-                creerImageBackground();
                 bufferNouveauGraphique();
             }
         }
@@ -171,8 +169,16 @@ namespace simulateurPergelisol_alpha_0._1
 
         public void changerMoisGras(int moisIndex, string moisString)
         {
-            m_currentMonthIndex = moisIndex;
-            m_moisSurligner = moisString;
+            if (moisString != null)
+            {
+                m_currentMonthIndex = Array.IndexOf(m_pointX, moisString);//moisIndex;
+                m_moisSurligner = moisString;
+            }
+            else
+            {
+                m_currentMonthIndex = 12;
+                m_moisSurligner = moisString;
+            }
             /*creerImageBackground(); */
             bufferNouveauGraphique();
         }
