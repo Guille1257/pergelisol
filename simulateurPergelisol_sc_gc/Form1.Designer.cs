@@ -39,6 +39,7 @@
             this.buttonFin = new System.Windows.Forms.Button();
             this.buttonDebut = new System.Windows.Forms.Button();
             this.panelTableau = new System.Windows.Forms.Panel();
+            this.toolStripAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panelTableau.SuspendLayout();
             this.SuspendLayout();
@@ -68,7 +69,8 @@
             this.villageToolStripMenuItem,
             this.typeDeSolToolStripMenuItem,
             this.couvertureToolStripMenuItem,
-            this.optionsToolStripMenuItem});
+            this.optionsToolStripMenuItem,
+            this.toolStripAbout});
             this.menuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -130,6 +132,13 @@
             this.panelTableau.TabIndex = 4;
             this.panelTableau.Paint += new System.Windows.Forms.PaintEventHandler(this.panelTableau_draw);
             // 
+            // toolStripAbout
+            // 
+            this.toolStripAbout.Name = "toolStripAbout";
+            this.toolStripAbout.Size = new System.Drawing.Size(24, 20);
+            this.toolStripAbout.Text = "?";
+            this.toolStripAbout.Click += new System.EventHandler(this.toolStripAbout_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -165,6 +174,7 @@
         private System.Windows.Forms.Button buttonDebut;
         private System.Windows.Forms.Panel panelTableau;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripAbout;
     }
 }
 

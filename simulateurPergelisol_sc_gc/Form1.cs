@@ -47,6 +47,7 @@ namespace simulateurPergelisol_alpha_0._1
 
         private Dictionary<string, string> m_equivalentMois;
         private Option m_formOption;
+        private about m_formabout;
 
         //Paramètre
         private int m_indexMoisDebut;
@@ -91,7 +92,7 @@ namespace simulateurPergelisol_alpha_0._1
 
             //form option
             m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
-
+            m_formabout = new about(m_langue);
             initialiserDatawrite();
            
 
@@ -660,8 +661,26 @@ namespace simulateurPergelisol_alpha_0._1
 
         }
 
-
+        
+        
+        private void toolStripAbout_Click(object sender, EventArgs e)
+  {
+ if (m_formabout.IsDisposed)
+            {
+                m_formabout = new about(m_langue);
+                m_formabout.Visible = true;
+            }
+            else
+            {
+                m_formabout.Visible = true;
+            }
+            Application.OpenForms["about"].BringToFront();
+  }
         #endregion
+
+  
+
+      
 
     }
 
