@@ -518,9 +518,9 @@ namespace simulateurPergelisol_alpha_0._1
             Pen penDraw = new Pen(Brushes.Black);
             penDraw.Width = 1;
             brushPoint.Color = Color.FromArgb(255, 120, 96, 74);
-            //e.Graphics.FillRectangle(brushPoint, new Rectangle(0, 0, this.Size.Width, m_tableauActif.Size.Height/13));
-            e.Graphics.DrawImage(Image.FromFile("image/top_panel.png"), new Point(0, 0));
-            //e.Graphics.DrawLine(penDraw, new Point(0, 0), new Point(this.Size.Width, 0));
+            e.Graphics.FillRectangle(brushPoint, new Rectangle(0, 0, this.Size.Width, m_tableauActif.Size.Height/13));
+            //e.Graphics.DrawImage(Image.FromFile("image/top_panel.png"), new Point(0, 0));
+            e.Graphics.DrawLine(penDraw, new Point(0, 0), new Point(this.Size.Width, 0));
             penDraw.Width = 1;
             e.Graphics.DrawLine(penDraw, new Point(0, m_tableauActif.Size.Height / 13), new Point(this.Size.Width, m_tableauActif.Size.Height / 13));
             brushPoint.Dispose();
@@ -569,6 +569,12 @@ namespace simulateurPergelisol_alpha_0._1
                 m_simulation = new Thread(this.sequenceDessin);
                 m_simulation.Start();
             }
+
+            if (!m_neige.done)
+            {
+                m_neige.killThread();
+            }
+
             m_neige.update();
         }
 
@@ -583,6 +589,11 @@ namespace simulateurPergelisol_alpha_0._1
             else
             {
                 clearSimulation();
+            }
+
+            if (!m_neige.done)
+            {
+                m_neige.killThread();
             }
 
             m_pasTracer = true;
@@ -699,7 +710,6 @@ namespace simulateurPergelisol_alpha_0._1
                 Application.OpenForms["about"].BringToFront();
       }
         #endregion
-
     }
 
     public class panelTransparent : PictureBox
@@ -888,7 +898,6 @@ namespace simulateurPergelisol_alpha_0._1
             int positionx = (((this.PointToClient(Cursor.Position).X) / (this.Width / 12)));
             double result = 0;
 
-
             if (m_indexMoisEnCours != positionx && m_commencerDessin && positionx <= m_moisEnCours)
             {
                 m_indexMoisEnCours = positionx;
@@ -961,8 +970,11 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void mouseLeave(object sender, EventArgs e)
         {
-            m_formParent.toolTipVisible(false);
-            m_formParent.annulerMoisGrasGraphique();
+            if (m_commencerDessin)
+            {
+                m_formParent.toolTipVisible(false);
+                m_formParent.annulerMoisGrasGraphique();
+            }
         }
 
         #endregion
@@ -997,8 +1009,7 @@ namespace simulateurPergelisol_alpha_0._1
         public void upLangue(string stemp, string sprofondeur)
         {
             m_sTemp = stemp;
-            m_sProfondeur = sprofondeur;
-            
+            m_sProfondeur = sprofondeur; 
         }
 
         protected override void OnPaint(PaintEventArgs pe)
@@ -1079,6 +1090,14 @@ namespace simulateurPergelisol_alpha_0._1
             catch (Exception e)
             {
                 creerFlocons(nbFlocon);
+                try
+                {
+                    m_simThread.Abort();
+                }
+                catch(Exception f)
+                 {
+
+                 }
                 m_simThread = new Thread(simulationSequence);
                 m_simThread.Start();
             }
@@ -1092,8 +1111,14 @@ namespace simulateurPergelisol_alpha_0._1
 
         public void update()
         {
-            invalidateControl();
-            m_controlParent.forceUpdate();
+            this.Invoke(delInvalidate);
+        }
+
+        public void killThread()
+        {
+            m_simThread.Abort();
+            started = false;
+            this.Invoke(delInvalidate);
         }
 
         private void hideControl(bool a)
@@ -1168,7 +1193,6 @@ namespace simulateurPergelisol_alpha_0._1
                 this.Invoke(delInvalidate);
                 Thread.Sleep(5);
             }
-         this.Invoke(hideDel, false);
         }
 
         private void calculNouveauFlocon()
@@ -1244,6 +1268,12 @@ namespace simulateurPergelisol_alpha_0._1
                 }
             }
         }
+
+        public bool done
+        {
+            get { return m_done; }
+        }
+
     }
 
     public class Flocon

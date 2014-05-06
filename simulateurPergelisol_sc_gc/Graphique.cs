@@ -135,7 +135,8 @@ namespace simulateurPergelisol_alpha_0._1
                     m_pointX[i] = nomPointX[i];
                 }
                 calculPopriete();
-                bufferNouveauGraphique();
+                //bufferNouveauGraphique();
+                this.Invoke(callBackDessin);
             }
         }
 
@@ -159,14 +160,16 @@ namespace simulateurPergelisol_alpha_0._1
             }
 
             creerImageBackground();
-            bufferNouveauGraphique();
+            //bufferNouveauGraphique();
+            this.Invoke(callBackDessin);
         }
 
         public void nettoyer()
         {
             m_tracer = false;
             m_dernierPoint = m_prochainPoint = 0;
-            bufferNouveauGraphique();
+            //bufferNouveauGraphique();
+            this.Invoke(callBackDessin);
         }
 
         public void changerMoisGras(int moisIndex, string moisString)
@@ -182,7 +185,8 @@ namespace simulateurPergelisol_alpha_0._1
                 m_moisSurligner = moisString;
             }
             /*creerImageBackground(); */
-            bufferNouveauGraphique();
+            //bufferNouveauGraphique();
+            this.Invoke(callBackDessin);
         }
 
         public void forceUpdate()
@@ -361,7 +365,8 @@ namespace simulateurPergelisol_alpha_0._1
 
                 while (m_compteur < m_vitesseTrace && !m_killThread)
                 {
-                    bufferNouveauGraphique();
+                    this.Invoke(callBackDessin);
+                    //bufferNouveauGraphique();
                     m_compteur++;
                     Thread.Sleep(15);
                 }
@@ -372,12 +377,14 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 m_dernierPoint = 10;
                 m_prochainPoint = 11;
-                bufferNouveauGraphique();
+                //bufferNouveauGraphique();
+                this.Invoke(callBackDessin);
             }
 
             if (prochainPoint == m_pointY.Length - 1)
             {
-                bufferNouveauGraphique();
+                this.Invoke(callBackDessin);
+                //bufferNouveauGraphique();
             }
 
             if (m_killThread)
