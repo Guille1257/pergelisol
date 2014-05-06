@@ -36,6 +36,7 @@ namespace simulateurPergelisol_alpha_0._1
         private List<Bitmap> m_listeBackGroundIMG;
 
         private string m_nomGraphique;
+        private string m_nomAxe;
         //Variable de points
         private float[] m_pointY;
         private string[] m_pointX;
@@ -73,7 +74,7 @@ namespace simulateurPergelisol_alpha_0._1
 
         private int m_currentMonthIndex;
 
-        public Graphique(System.Drawing.Point location, System.Drawing.Size grosseur, float[] CoordPointY, string[] nomPointX, string nomGraphique)
+        public Graphique(System.Drawing.Point location, System.Drawing.Size grosseur, float[] CoordPointY, string[] nomPointX, string nomGraphique,string nomAxe)
         {
             InitializeComponent();
             initVariableAffichage();
@@ -86,6 +87,7 @@ namespace simulateurPergelisol_alpha_0._1
 
             m_imgPath = new Bitmap(Image.FromFile("image/backgroundGraphe.png"));
             m_nomGraphique = nomGraphique;
+            m_nomAxe = nomAxe;
             m_pointY = CoordPointY;
             m_pointX = nomPointX;
             this.Size = grosseur;
@@ -703,7 +705,8 @@ namespace simulateurPergelisol_alpha_0._1
 
                 SizeF rect = calculTailleString(m_nomGraphique, fontTitre);
                 g.DrawString(m_nomGraphique, fontTitre, new SolidBrush(Color.Black), new PointF(this.Size.Width / 2 - rect.Width / 2, 15));
-
+                //axe
+                g.DrawString(m_nomAxe, fontGraduation, new SolidBrush(Color.Black), new PointF(30, 15));
                 //traçage des axes
 
                 g.DrawLine(pen, m_margePixelX - grandeurBarreGrad, m_origine[1], this.Size.Width - m_margePixelX, m_origine[1]); //x (0)

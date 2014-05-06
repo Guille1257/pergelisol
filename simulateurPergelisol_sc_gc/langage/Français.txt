@@ -9,5 +9,5 @@ comboxBoxMois;Octobre;Novembre;Décembre;Janvier;Février;Mars;Avril;Mai;Juin;Juil
 lblVitesseSim;Vitesse de la simulation;
 lblOpacite;Opacité température au sol;
 lblLangue;Langue;Français;Anglais;
-nomGraphe;Température de l'air en fonction du mois;
+nomGraphe;Température de l'air en fonction du mois;Temperature (ºC);Profondeur (m);
 datawrite;Température:;Profondeur:;

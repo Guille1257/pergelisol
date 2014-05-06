@@ -23,7 +23,8 @@ namespace simulateurPergelisol_alpha_0._1
                 {
                     tabTexte = sr.ReadToEnd().Split(';');
                     sr.Close();
-                    richTextBox1.Text += tabTexte[1];
+                  
+                 
                 }
 
             }
@@ -37,6 +38,7 @@ namespace simulateurPergelisol_alpha_0._1
           
 
             InitializeComponent();
+            textBox1.Text = tabTexte[1];
         }
     }
 }

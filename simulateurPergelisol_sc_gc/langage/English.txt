@@ -9,5 +9,5 @@ comboxBoxMois;October;November;December;January;February;March;April;May;June;Ju
 lblVitesseSim;Simulation speed;
 lblOpacite;Ground temperature opacity;
 lblLangue;Language;French;English;
-nomGraphe;Air temperature vs. month;
+nomGraphe;Air temperature vs. month;Temperature (ºC);Depth (m);
 datawrite;Temperature:;Depth:;

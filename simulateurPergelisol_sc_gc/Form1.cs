@@ -43,7 +43,8 @@ namespace simulateurPergelisol_alpha_0._1
         //String pour langage
         private string m_nomGraphique,
                        m_moisDebut,
-                       m_langue;
+                       m_langue,
+                       m_nomAxe;
 
         private Dictionary<string, string> m_equivalentMois;
         private Option m_formOption;
@@ -83,7 +84,7 @@ namespace simulateurPergelisol_alpha_0._1
 
             this.panelTableau.BackgroundImageLayout = ImageLayout.Stretch;
 
-            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
+            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique,m_nomAxe);
             initialiserBoutonSimulation();
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
 
@@ -118,7 +119,7 @@ namespace simulateurPergelisol_alpha_0._1
             m_langue = langue;
             chargerLangage(m_langue);
             this.panelGraphique.Controls.Remove(m_graphique);
-            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
+            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique,m_nomAxe);
             this.panelTableau.Controls.Remove(m_tableauActif);
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
             if (!m_pasTracer)
@@ -144,7 +145,7 @@ namespace simulateurPergelisol_alpha_0._1
         {
             m_moisDebut = i;
             this.panelGraphique.Controls.Remove(m_graphique);
-            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique);
+            genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique,m_nomAxe);
             this.panelTableau.Controls.Remove(m_tableauActif);
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
 
@@ -257,12 +258,12 @@ namespace simulateurPergelisol_alpha_0._1
         }
 
 
-        private void genererGraphique(Point location, Size size, string nomGraphique)
+        private void genererGraphique(Point location, Size size, string nomGraphique,string nomAxe)
         {
             float[] coordY = new float[12];
             string[] nomX = new string[12];
             lireAirTemperature(ref coordY, ref nomX);
-            this.m_graphique = new Graphique(location, size, coordY, nomX, nomGraphique);
+            this.m_graphique = new Graphique(location, size, coordY, nomX, nomGraphique,nomAxe);
             this.panelGraphique.Controls.Add(this.m_graphique);
         }
 
@@ -396,6 +397,7 @@ namespace simulateurPergelisol_alpha_0._1
          
                this.m_langueCharger = true;
                 m_nomGraphique = tabTexte[indexNomGraphe + 1];
+                m_nomAxe = tabTexte[indexNomGraphe + 2];
                 m_moisDebut = m_equivalentMois.ElementAt(0).Key;
             }
         }
