@@ -19,6 +19,7 @@ namespace simulateurPergelisol_alpha_0._1
         private Graphique m_graphique;
         private panelTransparent m_tableauActif;
         private dataWriter m_writeData;
+        private neigeContainer m_neige;
 
         //Variables du menu
         private List<ToolStripMenuItem> m_listeVillage;
@@ -87,6 +88,7 @@ namespace simulateurPergelisol_alpha_0._1
             genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique,m_nomAxe);
             initialiserBoutonSimulation();
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
+            genererNeigeContainer();
 
             m_finiTracer = true;
             this.panelGraphique.BackColor = Color.AliceBlue;
@@ -95,8 +97,6 @@ namespace simulateurPergelisol_alpha_0._1
             m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
             m_formabout = new about(m_langue);
             initialiserDatawrite();
-           
-
         }
 
         #region Méthode publique
@@ -120,6 +120,7 @@ namespace simulateurPergelisol_alpha_0._1
             chargerLangage(m_langue);
             this.panelGraphique.Controls.Remove(m_graphique);
             genererGraphique(new Point(0, 0), new Size(this.panelGraphique.Size.Width, this.panelGraphique.Size.Height), m_nomGraphique,m_nomAxe);
+            genererNeigeContainer();
             this.panelTableau.Controls.Remove(m_tableauActif);
             genererTableauActif(new Point((int)(m_graphique.getOrigine()[0] - m_graphique.getEspaceParGraduationX() / 2), 0), new Size((int)m_graphique.getGrandeurAxeX(), this.panelTableau.Size.Height));
             if (!m_pasTracer)
@@ -191,7 +192,6 @@ namespace simulateurPergelisol_alpha_0._1
 
         #endregion
 
-
         #region Méthode simulation
 
         private void sequenceDessin()
@@ -208,6 +208,17 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 while (prochainPoint < 12 && !m_killThread)
                 {
+
+                    if (dernierPoint == 0)
+                    {
+                        m_neige.start();
+                    }
+
+                    else if (dernierPoint == 7)
+                    {
+                        m_neige.finishThread();
+                    }
+
                     dernierPoint = prochainPoint;
                     m_tableauActif.setProchainMois(prochainPoint);
                     m_graphique.sequenceDessin(prochainPoint, m_vitesseSimulation,false);
@@ -257,6 +268,17 @@ namespace simulateurPergelisol_alpha_0._1
 
         }
 
+        private void genererNeigeContainer()
+        {
+            m_neige = new neigeContainer(150, ref m_graphique);
+            m_neige.Location = new Point(0, 0);
+            m_neige.Size = this.panelGraphique.Size;
+            m_neige.BackColor = Color.Transparent;
+            m_graphique.Controls.Add(m_neige);
+            m_neige.Hide();
+            // m_graphique.Hide();
+            //this.panelGraphique.Hide();
+        }
 
         private void genererGraphique(Point location, Size size, string nomGraphique,string nomAxe)
         {
@@ -392,7 +414,7 @@ namespace simulateurPergelisol_alpha_0._1
                 this.buttonFin.Text = tabTexte[indexBouton + 3];
 
                 //changement datawrite
-          if(m_writeData!=null)
+            if(m_writeData!=null)
                 m_writeData.upLangue(tabTexte[indexDatawrite+1],tabTexte[indexDatawrite+2]);
          
                this.m_langueCharger = true;
@@ -524,7 +546,7 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 m_overrideSimulation = false;
                 m_simulation = new Thread(this.sequenceDessin);
-                m_simulation.Start(); 
+                m_simulation.Start();
             }
         }
 
@@ -547,7 +569,7 @@ namespace simulateurPergelisol_alpha_0._1
                 m_simulation = new Thread(this.sequenceDessin);
                 m_simulation.Start();
             }
-
+            m_neige.update();
         }
 
         private void buttonDebut_Click(object sender, EventArgs e)
@@ -663,26 +685,20 @@ namespace simulateurPergelisol_alpha_0._1
 
         }
 
-        
-        
-        private void toolStripAbout_Click(object sender, EventArgs e)
-  {
- if (m_formabout.IsDisposed)
-            {
-                m_formabout = new about(m_langue);
-                m_formabout.Visible = true;
-            }
-            else
-            {
-                m_formabout.Visible = true;
-            }
-            Application.OpenForms["about"].BringToFront();
-  }
+      private void toolStripAbout_Click(object sender, EventArgs e)
+      {
+     if (m_formabout.IsDisposed)
+                {
+                    m_formabout = new about(m_langue);
+                    m_formabout.Visible = true;
+                }
+                else
+                {
+                    m_formabout.Visible = true;
+                }
+                Application.OpenForms["about"].BringToFront();
+      }
         #endregion
-
-  
-
-      
 
     }
 
@@ -804,12 +820,10 @@ namespace simulateurPergelisol_alpha_0._1
                             else
                             {
                                 brush = getBrush(Convert.ToDouble(m_tableau[(y + 1) + m_typeSol * 14, x + m_indexMoisDebut]), opacite);
-
                             }
                             e.Graphics.FillRectangle(brush, (float)(x * m_espaceX), (float)(y * this.Height / 13), (float)(m_espaceX), (float)(this.Height / 13));
                             brush.Dispose();
                             e.Graphics.DrawRectangle(pen, (float)(x * m_espaceX), (float)(y * this.Height / 13), (float)(m_espaceX), (float)(this.Height / 13));
-
                         }
                     }
 
@@ -818,14 +832,9 @@ namespace simulateurPergelisol_alpha_0._1
                     else
                        e.Graphics.DrawRectangle(pen, 0, 0, m_moisEnCours * m_espaceX, this.Size.Height - 1);
 
-                    //draw tooltip
-                    //e.Graphics.FillRectangle(tomatoBrush, new Rectangle(m_toolTip.Location, m_toolTip.Size));
-                   // e.Graphics.DrawString(m_labelToolTip.Text, fontToolTip, new SolidBrush(Color.Black), new PointF(m_toolTip.Location.X, m_toolTip.Location.Y));
-
                     pen.Dispose();
                 }
             }
-
             base.OnPaint(e);
         }
 
@@ -1024,6 +1033,345 @@ namespace simulateurPergelisol_alpha_0._1
             writing.Dispose();
             writingBrush.Dispose();
 
+        }
+
+    }
+
+    public class neigeContainer : PictureBox
+    {
+        private Flocon[] m_arrayFlocons;
+        private Random rng;
+        private Thread m_simThread;
+        private delegate void voidDelegate();
+        private delegate void voidDelegateArgs(bool a);
+        private voidDelegate delInvalidate;
+        private voidDelegateArgs hideDel;
+        private bool started;
+        private Bitmap solIMG;
+        private int nbFlocon;
+        private object lockIMG;
+        private Graphique m_controlParent;
+        private bool m_done;
+        private int m_doneCount;
+
+        public neigeContainer(int nbFloconPerThread, ref Graphique parent)
+        {
+            m_controlParent = parent;
+            delInvalidate = invalidateControl;
+            hideDel = hideControl;
+            lockIMG = new object();
+            nbFlocon = nbFloconPerThread;
+            m_simThread = new Thread(simulationSequence);
+            m_done = false;
+            rng = new Random();
+            this.Size = parent.Size;
+            solIMG = new Bitmap(this.Size.Width, this.Size.Height);
+            initSol();
+            creerFlocons(nbFloconPerThread);
+        }
+
+        public void start()
+        {
+            try
+            {
+                m_simThread.Start();
+            }
+            catch (Exception e)
+            {
+                creerFlocons(nbFlocon);
+                m_simThread = new Thread(simulationSequence);
+                m_simThread.Start();
+            }
+            started = true;
+        }
+
+        public void finishThread()
+        {
+            m_done = true;
+        }
+
+        public void update()
+        {
+            invalidateControl();
+            m_controlParent.forceUpdate();
+        }
+
+        private void hideControl(bool a)
+        {
+            this.Visible = a;
+            m_controlParent.forceUpdate();
+        }
+
+        private void creerFlocons(int nombre)
+        {
+            int tempGen;
+            m_arrayFlocons = new Flocon[nombre];
+            for (int i = 0; i < m_arrayFlocons.Length; i++)
+            {
+                tempGen = rng.Next(-100, this.Size.Width);
+                if (rng.Next(0, 50) > 10)
+                {
+                    m_arrayFlocons[i] = new Flocon(new int[] { tempGen, rng.Next(0, this.Size.Height) }, new int[] { rng.Next(tempGen, tempGen + 275), this.Size.Height },
+                                                    this.Size.Height - 5);
+                }
+                else
+                {
+                    m_arrayFlocons[i] = new Flocon(new int[] { tempGen, rng.Next(0, this.Size.Height) }, new int[] { rng.Next(tempGen - 100, tempGen), this.Size.Height },
+                                this.Size.Height - 5);
+                }
+            }
+        }
+
+        private void invalidateControl()
+        {
+            this.Invalidate();
+            this.Update();
+            this.Refresh();
+        }
+
+        private void bufferNouveauBackground()
+        {
+            Bitmap buffer = new Bitmap(this.Size.Width, this.Size.Height);
+
+            using (Graphics g = Graphics.FromImage(buffer))
+            {
+                using (Graphics gDone = this.CreateGraphics())
+                {
+                    //m_controlParent.forceUpdate();
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    gDone.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+                    lock (lockIMG)
+                    {
+                        // g.DrawImage(backgroundIMG, new Point(0, 0));
+                        // g.DrawImage(solIMG, new Point(0, 0));
+                    }
+
+                    foreach (Flocon f in m_arrayFlocons)
+                    {
+                        g.FillEllipse(Brushes.White, f.coordinates[0], f.coordinates[1], f.taille, f.taille);
+                    }
+                    gDone.DrawImage(buffer, new Point(0, 0));
+                }
+            }
+            buffer.Dispose();
+        }
+
+        private void simulationSequence()
+        {
+            m_done = false;
+            m_doneCount = 0;
+            this.Invoke(hideDel, true);
+            while (!m_done || m_doneCount != nbFlocon)
+            {
+                calculNouveauFlocon();
+                this.Invoke(delInvalidate);
+                Thread.Sleep(5);
+            }
+         this.Invoke(hideDel, false);
+        }
+
+        private void calculNouveauFlocon()
+        {
+            int tempGen;
+            foreach (Flocon f in m_arrayFlocons)
+            {
+                f.calculNextPoint(rng);
+                if (f.coordinates[1] >= f.limitCollision)
+                {
+                    ajouterFloconSol(f);
+                    tempGen = rng.Next(-100, this.Size.Width);
+
+                    if (rng.Next(0, 50) > 10)
+                    {
+                        if (!m_done && !f.done)
+                        {
+                            f.reset(new int[] { tempGen, 0 }, new int[] { rng.Next(tempGen, tempGen + 275), this.Size.Height },
+                                  this.Size.Height - 5);
+                        }
+                    }
+
+                    else
+                    {
+                        if (!m_done && !f.done)
+                        {
+                            f.reset(new int[] { tempGen, 0 }, new int[] { rng.Next(tempGen - 100, tempGen), this.Size.Height },
+                                  this.Size.Height - 5);
+                        }
+                    }
+
+                    if (m_done && !f.done)
+                    {
+                        f.done = true;
+                        m_doneCount++;
+                    }
+                }
+            }
+        }
+
+        private void ajouterFloconSol(Flocon f)
+        {
+            lock (lockIMG)
+            {
+                using (Graphics g = Graphics.FromImage(solIMG))
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    g.FillEllipse(Brushes.White, f.coordinates[0], f.coordinates[1], f.taille, f.taille);
+                }
+            }
+        }
+
+        private void initSol()
+        {
+            using (Graphics g = Graphics.FromImage(solIMG))
+            {
+                Brush b = new SolidBrush(Color.FromArgb(255, 80, 80, 80));
+                g.FillRectangle(b, new Rectangle(0, 0, this.Size.Width, this.Size.Height));
+                b.Dispose();
+            }
+            solIMG.MakeTransparent(Color.FromArgb(255, 80, 80, 80));
+        }
+
+        protected override void OnPaint(PaintEventArgs pe)
+        {
+            base.OnPaint(pe);
+            if (started)
+            {
+                pe.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                foreach (Flocon f in m_arrayFlocons)
+                {
+                    pe.Graphics.FillEllipse(Brushes.White, f.coordinates[0], f.coordinates[1], f.taille, f.taille);
+                }
+            }
+        }
+    }
+
+    public class Flocon
+    {
+        private int[] m_coordDebut,
+                        m_coordFin,
+                        m_currentCoord;
+
+        private double m_coefficient,
+                        m_zero;
+
+        private int m_taille,
+                        m_compteur,
+                        m_limit;
+
+        private bool m_inverser;
+        private bool m_done;
+
+        private Random rng;
+
+        public Flocon(int[] coordDebut, int[] coordFin, int limitCollision)
+        {
+            m_coordDebut = m_currentCoord = coordDebut;
+            m_coordFin = coordFin;
+            m_taille = taille;
+            rng = new Random();
+            m_limit = limitCollision;
+            m_compteur = 0;
+            calculRegle();
+            genererTaille();
+            m_done = false;
+        }
+
+        public void calculNextPoint(Random rnd)
+        {
+
+            if (m_inverser)
+                m_compteur--;
+            else
+                m_compteur++;
+
+            if (m_coefficient != 0)
+            {
+                m_currentCoord = new int[] { m_coordDebut[0] + m_compteur, (int)(m_coefficient * (m_compteur + m_coordDebut[0]) + m_zero) };
+            }
+            else
+            {
+                m_currentCoord = new int[] { m_coordDebut[0], m_coordDebut[1] + m_compteur };
+            }
+        }
+
+        public void reset(int[] coordDebut, int[] coordFin, int limitCollision)
+        {
+            m_coordDebut = m_currentCoord = coordDebut;
+            m_coordFin = coordFin;
+            m_limit = limitCollision;
+            m_compteur = 0;
+            m_inverser = false;
+            calculRegle();
+            genererTaille();
+        }
+
+        private void calculRegle()
+        {
+            if (m_coordDebut[0] != m_coordFin[0])
+            {
+                m_coefficient = ((double)m_coordFin[1] - (double)m_coordDebut[1]) / ((double)m_coordFin[0] - (double)m_coordDebut[0]);
+                m_zero = m_coordDebut[1] - m_coordDebut[0] * m_coefficient;
+            }
+            else
+            {
+                m_coefficient = 0;
+                m_zero = 0;
+            }
+
+            if (m_coordFin[0] < m_coordDebut[0])
+            {
+                m_inverser = true;
+            }
+        }
+
+        private void genererTaille()
+        {
+            double[] bound = { 15, 5, 2.5, 1.3, 0.8, 0.3 }; //5 interval
+            int[,] tailleInterval = new int[,] { { 4, 7 }, { 2, 7 }, { 2, 5 }, { 2, 4 }, { 2, 3 }, { 2, 2 } };
+
+            if (m_coefficient < bound[0])
+            {
+                for (int i = 0; i < bound.Length; i++)
+                {
+                    if (m_coefficient >= bound[i] && m_coefficient <= bound[i - 1])
+                    {
+                        m_taille = rng.Next(tailleInterval[i, 0], tailleInterval[i, 1]);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                m_taille = rng.Next(tailleInterval[0, 0], tailleInterval[0, 1]);
+            }
+
+            if (m_taille == 0)
+            {
+                m_taille = 1;
+            }
+
+        }
+
+        public int limitCollision
+        {
+            get { return m_limit; }
+        }
+
+        public int taille
+        {
+            get { return m_taille; }
+        }
+
+        public bool done
+        {
+            get { return m_done; }
+            set { m_done = value; }
+        }
+
+        public int[] coordinates
+        {
+            get { return m_currentCoord; }
         }
 
     }

@@ -1214,4 +1214,8 @@ C:\Users\Guillaume\github\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simula
 C:\Users\Guillaume\github\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_alpha_0._1.Properties.Resources.resources
 C:\Users\Guillaume\github\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_sc_gc.csproj.GenerateResource.Cache
 C:\Users\1244204\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_alpha_0._1.about.resources
+<<<<<<< Updated upstream
 C:\Users\1244204\Desktop\GitHub\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_alpha_0._1.about.resources
+=======
+C:\Users\1257521.CEGEPTR\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_alpha_0._1.about.resources
+>>>>>>> Stashed changes

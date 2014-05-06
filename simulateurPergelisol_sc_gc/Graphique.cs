@@ -185,6 +185,11 @@ namespace simulateurPergelisol_alpha_0._1
             bufferNouveauGraphique();
         }
 
+        public void forceUpdate()
+        {
+            bufferNouveauGraphique();
+        }
+
         public void killSimulation()
         {
             m_killThread = true;
@@ -200,7 +205,12 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 Graphics g = e.Graphics;
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                g.DrawImage(m_background, 0, 0);
+
+
+                lock (lockSimThread)
+                {
+                    g.DrawImage(m_listeBackGroundIMG[m_currentMonthIndex], 0, 0);
+                }
 
                 SolidBrush brushPoint = new SolidBrush(Color.Black);
                 Pen pen = new Pen(Color.Black, 1);
@@ -343,7 +353,7 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 m_compteur = 0;
                 double lol = TimeSpan.FromTicks(m_ticksSimulation).TotalSeconds;
-                m_vitesseTrace = 70;
+                m_vitesseTrace = 50;
                 m_dernierPoint = prochainPoint - 1;
                 m_prochainPoint = prochainPoint;
                 trouverRegle();
@@ -353,8 +363,8 @@ namespace simulateurPergelisol_alpha_0._1
                 {
                     bufferNouveauGraphique();
                     m_compteur++;
+                    Thread.Sleep(15);
                 }
-
                 m_enterDeuxPoints = false;
             }
 
@@ -389,44 +399,6 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 Graphics g = Graphics.FromImage(buffer);
                 Graphics gNeige = Graphics.FromImage(neige);
-
-               /* gNeige.FillRectangle(new SolidBrush(Color.AliceBlue), new Rectangle(0, 0, this.Size.Width, this.Size.Height));
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i *5, 50 + m_compteur, 3, 3));
-                }
-
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 100 + m_compteur, 3, 3));
-                }
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 150 + m_compteur, 3, 3));
-                }
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 200 + m_compteur, 3, 3));
-                }
-
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 10 + m_compteur, 3, 3));
-                }
-
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 130 + m_compteur, 3, 3));
-                }
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 180 + m_compteur, 3, 3));
-                }
-                for (int i = 0; i < 200; i++)
-                {
-                    gNeige.FillEllipse(new SolidBrush(Color.Beige), new Rectangle(10 + i * 5, 220 + m_compteur, 3, 3));
-                } */
-
                 neige.MakeTransparent(Color.AliceBlue);
 
                 if (m_tracer || m_test)
@@ -450,10 +422,8 @@ namespace simulateurPergelisol_alpha_0._1
 
                     for (int i = 0; i <= m_prochainPoint; i++)
                     {
-
                         if (!m_overideTracage)
                         {
-
                             if (i != m_prochainPoint)
                             {
                                 g.FillEllipse(bBrush, m_margePixelX + (m_graduationPixelX / m_valGraduationX) * i - 3,
