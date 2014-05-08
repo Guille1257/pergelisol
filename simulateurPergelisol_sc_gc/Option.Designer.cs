@@ -37,8 +37,6 @@
             this.labelLangue = new System.Windows.Forms.Label();
             this.labelOpacite = new System.Windows.Forms.Label();
             this.labelVitSimulation = new System.Windows.Forms.Label();
-            this.comboBoxMoisDebut = new System.Windows.Forms.ComboBox();
-            this.labelMoisDebut = new System.Windows.Forms.Label();
             this.groupBoxOptions.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,11 +50,9 @@
             this.groupBoxOptions.Controls.Add(this.labelLangue);
             this.groupBoxOptions.Controls.Add(this.labelOpacite);
             this.groupBoxOptions.Controls.Add(this.labelVitSimulation);
-            this.groupBoxOptions.Controls.Add(this.comboBoxMoisDebut);
-            this.groupBoxOptions.Controls.Add(this.labelMoisDebut);
             this.groupBoxOptions.Location = new System.Drawing.Point(12, 12);
             this.groupBoxOptions.Name = "groupBoxOptions";
-            this.groupBoxOptions.Size = new System.Drawing.Size(381, 164);
+            this.groupBoxOptions.Size = new System.Drawing.Size(381, 117);
             this.groupBoxOptions.TabIndex = 0;
             this.groupBoxOptions.TabStop = false;
             this.groupBoxOptions.Text = "Options";
@@ -66,7 +62,7 @@
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.SystemColors.Window;
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label2.Location = new System.Drawing.Point(199, 52);
+            this.label2.Location = new System.Drawing.Point(199, 54);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(21, 15);
             this.label2.TabIndex = 10;
@@ -76,7 +72,7 @@
             // 
             this.hScrollBar2.LargeChange = 1;
             this.hScrollBar2.Location = new System.Drawing.Point(229, 54);
-            this.hScrollBar2.Maximum = 20;
+            this.hScrollBar2.Maximum = 60;
             this.hScrollBar2.Name = "hScrollBar2";
             this.hScrollBar2.Size = new System.Drawing.Size(139, 15);
             this.hScrollBar2.TabIndex = 9;
@@ -88,7 +84,7 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.SystemColors.Window;
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label1.Location = new System.Drawing.Point(199, 107);
+            this.label1.Location = new System.Drawing.Point(199, 86);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(27, 15);
             this.label1.TabIndex = 8;
@@ -97,7 +93,7 @@
             // hScrollBar1
             // 
             this.hScrollBar1.LargeChange = 1;
-            this.hScrollBar1.Location = new System.Drawing.Point(229, 109);
+            this.hScrollBar1.Location = new System.Drawing.Point(229, 88);
             this.hScrollBar1.Maximum = 255;
             this.hScrollBar1.Name = "hScrollBar1";
             this.hScrollBar1.Size = new System.Drawing.Size(139, 15);
@@ -108,7 +104,7 @@
             // 
             this.comboBoxLangue.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxLangue.FormattingEnabled = true;
-            this.comboBoxLangue.Location = new System.Drawing.Point(247, 79);
+            this.comboBoxLangue.Location = new System.Drawing.Point(247, 19);
             this.comboBoxLangue.Name = "comboBoxLangue";
             this.comboBoxLangue.Size = new System.Drawing.Size(121, 21);
             this.comboBoxLangue.TabIndex = 6;
@@ -117,7 +113,7 @@
             // labelLangue
             // 
             this.labelLangue.AutoSize = true;
-            this.labelLangue.Location = new System.Drawing.Point(6, 82);
+            this.labelLangue.Location = new System.Drawing.Point(6, 27);
             this.labelLangue.Name = "labelLangue";
             this.labelLangue.Size = new System.Drawing.Size(35, 13);
             this.labelLangue.TabIndex = 5;
@@ -126,7 +122,7 @@
             // labelOpacite
             // 
             this.labelOpacite.AutoSize = true;
-            this.labelOpacite.Location = new System.Drawing.Point(6, 109);
+            this.labelOpacite.Location = new System.Drawing.Point(6, 90);
             this.labelOpacite.Name = "labelOpacite";
             this.labelOpacite.Size = new System.Drawing.Size(35, 13);
             this.labelOpacite.TabIndex = 4;
@@ -135,37 +131,20 @@
             // labelVitSimulation
             // 
             this.labelVitSimulation.AutoSize = true;
-            this.labelVitSimulation.Location = new System.Drawing.Point(6, 54);
+            this.labelVitSimulation.Location = new System.Drawing.Point(6, 56);
             this.labelVitSimulation.Name = "labelVitSimulation";
             this.labelVitSimulation.Size = new System.Drawing.Size(35, 13);
             this.labelVitSimulation.TabIndex = 2;
             this.labelVitSimulation.Text = "label1";
             // 
-            // comboBoxMoisDebut
-            // 
-            this.comboBoxMoisDebut.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxMoisDebut.FormattingEnabled = true;
-            this.comboBoxMoisDebut.Location = new System.Drawing.Point(247, 22);
-            this.comboBoxMoisDebut.Name = "comboBoxMoisDebut";
-            this.comboBoxMoisDebut.Size = new System.Drawing.Size(121, 21);
-            this.comboBoxMoisDebut.TabIndex = 1;
-            this.comboBoxMoisDebut.SelectionChangeCommitted += new System.EventHandler(this.comboBoxMoisDebut_SelectedIndexChanged);
-            // 
-            // labelMoisDebut
-            // 
-            this.labelMoisDebut.AutoSize = true;
-            this.labelMoisDebut.Location = new System.Drawing.Point(6, 25);
-            this.labelMoisDebut.Name = "labelMoisDebut";
-            this.labelMoisDebut.Size = new System.Drawing.Size(35, 13);
-            this.labelMoisDebut.TabIndex = 0;
-            this.labelMoisDebut.Text = "label1";
-            // 
             // Option
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(398, 188);
+            this.ClientSize = new System.Drawing.Size(398, 138);
             this.Controls.Add(this.groupBoxOptions);
+            this.MaximumSize = new System.Drawing.Size(414, 176);
+            this.MinimumSize = new System.Drawing.Size(414, 176);
             this.Name = "Option";
             this.Text = "Option";
             this.groupBoxOptions.ResumeLayout(false);
@@ -179,8 +158,6 @@
         private System.Windows.Forms.GroupBox groupBoxOptions;
         private System.Windows.Forms.Label labelOpacite;
         private System.Windows.Forms.Label labelVitSimulation;
-        private System.Windows.Forms.ComboBox comboBoxMoisDebut;
-        private System.Windows.Forms.Label labelMoisDebut;
         private System.Windows.Forms.ComboBox comboBoxLangue;
         private System.Windows.Forms.Label labelLangue;
         private System.Windows.Forms.Label label1;

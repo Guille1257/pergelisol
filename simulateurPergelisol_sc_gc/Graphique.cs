@@ -199,6 +199,29 @@ namespace simulateurPergelisol_alpha_0._1
             m_killThread = true;
         }
 
+        public int[] getMonth()
+        {
+            int[] months = { 0, 0 };
+            bool first, last;
+            first = last = false;
+
+            for (int i = 0; i < m_pointY.Length; i++)
+            {
+                if (m_pointY[i] < 0 && first == false)
+                {
+                    first = true;
+                    months[0] = i;
+                }
+
+                else if (m_pointY[i] > 0 && last == false && first == true)
+                {
+                    last = true;
+                    months[1] = i;
+                }
+            }
+            return months;
+        }
+
         #region Méthode override
 
         protected override void OnPaint(PaintEventArgs e)
@@ -357,7 +380,7 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 m_compteur = 0;
                 double lol = TimeSpan.FromTicks(m_ticksSimulation).TotalSeconds;
-                m_vitesseTrace = 50;
+                m_vitesseTrace = vitesseTrace;
                 m_dernierPoint = prochainPoint - 1;
                 m_prochainPoint = prochainPoint;
                 trouverRegle();

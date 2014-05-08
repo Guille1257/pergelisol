@@ -70,10 +70,9 @@ namespace simulateurPergelisol_alpha_0._1
             m_langue = "Français";
             chargerLangage(m_langue);
 
-
             //paramètre
             m_pasTracer = true;
-            m_vitesseSimulation = 20;
+            m_vitesseSimulation = 50;
             m_opacite = 200;
             
             m_villageItem = m_listeVillage[0];
@@ -94,7 +93,7 @@ namespace simulateurPergelisol_alpha_0._1
             this.panelGraphique.BackColor = Color.AliceBlue;
 
             //form option
-            m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
+            m_formOption = new Option(this, m_langue, m_vitesseSimulation, m_opacite);
             m_formabout = new about(m_langue);
             initialiserDatawrite();
         }
@@ -199,6 +198,7 @@ namespace simulateurPergelisol_alpha_0._1
             int dernierPoint,
                 prochainPoint;
 
+            int[] months = m_graphique.getMonth();
             m_finiTracer = false;
 
             dernierPoint = 0;
@@ -209,12 +209,12 @@ namespace simulateurPergelisol_alpha_0._1
                 while (prochainPoint < 12 && !m_killThread)
                 {
 
-                    if (dernierPoint == 0)
+                    if (dernierPoint == months[0])
                     {
                         m_neige.start();
                     }
 
-                    else if (dernierPoint == 7)
+                    else if (dernierPoint == months[1])
                     {
                         m_neige.finishThread();
                     }
@@ -224,7 +224,6 @@ namespace simulateurPergelisol_alpha_0._1
                     m_graphique.sequenceDessin(prochainPoint, m_vitesseSimulation,false);
                     prochainPoint += 1;
                 }
-
                 m_tableauActif.setProchainMois(prochainPoint);
             }
 
@@ -240,7 +239,6 @@ namespace simulateurPergelisol_alpha_0._1
                 clearSimulation();
                 m_killThread = false;
             }
-
             m_finiTracer = true;
         }
 
@@ -275,7 +273,6 @@ namespace simulateurPergelisol_alpha_0._1
             m_neige.Size = this.panelGraphique.Size;
             m_neige.BackColor = Color.Transparent;
             m_graphique.Controls.Add(m_neige);
-            m_neige.Hide();
             // m_graphique.Hide();
             //this.panelGraphique.Hide();
         }
@@ -552,7 +549,6 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void buttonFin_Click(object sender, EventArgs e)
         {
-
             m_overrideSimulation = true;
             m_pasTracer = false;
 
@@ -560,7 +556,6 @@ namespace simulateurPergelisol_alpha_0._1
             {
                 m_simulation = new Thread(this.sequenceDessin);
                 m_simulation.Start();
-
             }
 
             else
@@ -580,16 +575,19 @@ namespace simulateurPergelisol_alpha_0._1
 
         private void buttonDebut_Click(object sender, EventArgs e)
         {
-            if (m_simulation.IsAlive)
+            if (m_simulation != null)
             {
-                m_killThread = true;
-                m_graphique.killSimulation();
+                if (m_simulation.IsAlive)
+                {
+                    m_killThread = true;
+                    m_graphique.killSimulation();
+                }
             }
 
-            else
-            {
+            //else
+            //{
                 clearSimulation();
-            }
+            //}
 
             if (!m_neige.done)
             {
@@ -604,7 +602,7 @@ namespace simulateurPergelisol_alpha_0._1
         {
             if (m_formOption.IsDisposed)
             {
-                m_formOption = new Option(this, m_langue, m_moisDebut, m_vitesseSimulation, m_opacite);
+                m_formOption = new Option(this, m_langue, m_vitesseSimulation, m_opacite);
                 m_formOption.Visible = true;
             }
             else
@@ -810,13 +808,14 @@ namespace simulateurPergelisol_alpha_0._1
         {
             if (m_commencerDessin)
             {
-                if (m_commencerDessin)
+                if (m_commencerDessin && opacite != 0)
                 {
                     m_espaceX = this.Width / 12;
                     Pen pen = new Pen(Color.Black);
                     SolidBrush brush;
                     SolidBrush tomatoBrush = new SolidBrush(Color.Tomato);
                     Font fontToolTip = new Font(FontFamily.GenericSansSerif, 8);
+
                     for (int x = 0; x < m_moisEnCours; x++)
                     {
                         for (int y = 0; y < 13; y++)
@@ -1116,7 +1115,14 @@ namespace simulateurPergelisol_alpha_0._1
 
         public void killThread()
         {
-            m_simThread.Abort();
+            try
+            {
+                m_simThread.Abort();
+            }
+            catch (Exception e)
+            {
+
+            }
             started = false;
             this.Invoke(delInvalidate);
         }

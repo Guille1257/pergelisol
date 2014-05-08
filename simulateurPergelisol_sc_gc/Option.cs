@@ -16,14 +16,12 @@ namespace simulateurPergelisol_alpha_0._1
     {
         private Form1 m_formParent;
         private String m_langue;
-        private string m_MoisDebut;
 
-        public Option(Form1 parent, string langue, string MoisDebut, int vitesseSim, int opacite)
+        public Option(Form1 parent, string langue, int vitesseSim, int opacite)
         {
             string[] files;
             m_formParent = parent;
             m_langue = langue;
-            m_MoisDebut = MoisDebut;
             InitializeComponent();
 
             files = Directory.GetFiles("langage");
@@ -41,13 +39,10 @@ namespace simulateurPergelisol_alpha_0._1
 
             chargerLangage();
 
-            comboBoxMoisDebut.SelectedIndex = -1;
-            comboBoxMoisDebut.Text = MoisDebut;
-
             label1.Text = opacite.ToString() ;
-            label2.Text = (31 - vitesseSim).ToString();
+            label2.Text = (vitesseSim - 20).ToString();
             hScrollBar1.Value = opacite;
-            hScrollBar2.Value = 31 - vitesseSim;
+            hScrollBar2.Value = vitesseSim - 20;
 
         }
 
@@ -80,17 +75,9 @@ namespace simulateurPergelisol_alpha_0._1
             {
 
                 indexFormOption = Array.IndexOf(tabTexte, "\r\nFormOptions");
-                this.labelMoisDebut.Text = tabTexte[indexFormOption + 2];
                 this.labelVitSimulation.Text = tabTexte[indexFormOption + 17];
                 this.labelOpacite.Text = tabTexte[indexFormOption + 19];
                 this.labelLangue.Text = tabTexte[indexFormOption + 21];
-
-                //chargement des mois
-                this.comboBoxMoisDebut.Items.Clear();
-                for (int i = 0; i < 12; i++)
-                {
-                    this.comboBoxMoisDebut.Items.Add(tabTexte[indexFormOption + 4 + i]);
-                }
             }
 
         }
@@ -108,12 +95,6 @@ namespace simulateurPergelisol_alpha_0._1
                 comboBoxLangue.SelectedText = m_langue;
         }
 
-        private void comboBoxMoisDebut_SelectedIndexChanged(object sender, EventArgs e)
-        {
-                m_MoisDebut = comboBoxMoisDebut.Text;
-                m_formParent.changerMoisDebut(m_MoisDebut);
-        }
-
         private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
             label1.Text = "" + hScrollBar1.Value;
@@ -123,13 +104,10 @@ namespace simulateurPergelisol_alpha_0._1
         private void hScrollBar2_Scroll(object sender, ScrollEventArgs e)
         {
             label2.Text = "" + hScrollBar2.Value;
-            m_formParent.changerVitesseSim(31 - hScrollBar2.Value);
+            m_formParent.changerVitesseSim(hScrollBar2.Value + 20);
         }
 
         #endregion
-
-
-
 
     }
 }
