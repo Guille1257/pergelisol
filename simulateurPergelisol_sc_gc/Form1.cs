@@ -514,10 +514,10 @@ namespace simulateurPergelisol_alpha_0._1
             SolidBrush brushPoint = new SolidBrush(Color.Black);
             Pen penDraw = new Pen(Brushes.Black);
             penDraw.Width = 1;
-            brushPoint.Color = Color.FromArgb(255, 120, 96, 74);
+            brushPoint.Color = Color.FromArgb(255, 54, 48, 45);
             e.Graphics.FillRectangle(brushPoint, new Rectangle(0, 0, this.Size.Width, m_tableauActif.Size.Height/13));
             //e.Graphics.DrawImage(Image.FromFile("image/top_panel.png"), new Point(0, 0));
-            e.Graphics.DrawLine(penDraw, new Point(0, 0), new Point(this.Size.Width, 0));
+         //   e.Graphics.DrawLine(penDraw, new Point(0, 0), new Point(this.Size.Width, 0));
             penDraw.Width = 1;
             e.Graphics.DrawLine(penDraw, new Point(0, m_tableauActif.Size.Height / 13), new Point(this.Size.Width, m_tableauActif.Size.Height / 13));
             brushPoint.Dispose();
