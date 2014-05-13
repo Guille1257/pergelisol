@@ -6,7 +6,7 @@ Bouton;Démarrer;Réinitialiser;Fin;
 FormOptions;
 lblMoisDebut;Mois de départ;
 comboxBoxMois;Octobre;Novembre;Décembre;Janvier;Février;Mars;Avril;Mai;Juin;Juillet;Août;Septembre;
-lblVitesseSim;Vitesse de la simulation;
+lblVitesseSim;Durée de la simulation;
 lblOpacite;Opacité température au sol;
 lblLangue;Langue;Français;Anglais;
 nomGraphe;Température de l'air en fonction du mois;Température (ºC);Profondeur (m);

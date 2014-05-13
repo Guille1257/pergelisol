@@ -6,7 +6,7 @@ Bouton;Start;Reset;End;
 FormOptions;
 lblMoisDebut;First month;
 comboxBoxMois;October;November;December;January;February;March;April;May;June;July;August;September;
-lblVitesseSim;Simulation speed;
+lblVitesseSim;Simulation length;
 lblOpacite;Ground temperature opacity;
 lblLangue;Language;French;English;
 nomGraphe;Air temperature vs. month;Temperature (ºC);Depth (m);

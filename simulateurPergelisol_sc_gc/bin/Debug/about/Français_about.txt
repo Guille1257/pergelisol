@@ -1,0 +1,19 @@
+﻿Donnée recueilli de octobre 2005 à septembre 2006 pour : 
+Akulivik, 
+Aupaluk, 
+Ivujivik, 
+Kangiqsualujjuaq, 
+Kangiqsujuaq, 
+Kangirsuk, 
+Puvurnituq,
+Quaqtaq, 
+Salluit, 
+Tasiujaq,
+Umiujaq
+
+Donnée recueilli en octobre 2008 et septembre 2009 pour : 
+Inukjuak,
+Kuujjuaq
+
+
+Développé par Samuel Côté et Guillaume Champagne (2014)

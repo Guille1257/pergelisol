@@ -304,3 +304,5 @@ C:\Users\1244204.CEGEPTR\Desktop\GitHub\pergelisol\simulateurPergelisol_sc_gc\ob
 C:\Users\1244204.CEGEPTR\Desktop\GitHub\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_alpha_0._1.Option.resources
 C:\Users\1244204.CEGEPTR\Desktop\GitHub\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_alpha_0._1.Properties.Resources.resources
 C:\Users\1244204.CEGEPTR\Desktop\GitHub\pergelisol\simulateurPergelisol_sc_gc\obj\Debug\simulateurPergelisol_sc_gc.csproj.GenerateResource.Cache
+C:\Users\1257521.CEGEPTR\pergelisol\simulateurPergelisol_sc_gc\bin\Debug\about\English_about.txt
+C:\Users\1257521.CEGEPTR\pergelisol\simulateurPergelisol_sc_gc\bin\Debug\about\Français_about.txt

@@ -29,6 +29,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.panelGraphique = new System.Windows.Forms.Panel();
             this.buttonDemarrer = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -36,10 +37,10 @@
             this.typeDeSolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.couvertureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.buttonFin = new System.Windows.Forms.Button();
             this.buttonDebut = new System.Windows.Forms.Button();
             this.panelTableau = new System.Windows.Forms.Panel();
-            this.toolStripAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panelTableau.SuspendLayout();
             this.SuspendLayout();
@@ -103,6 +104,13 @@
             this.optionsToolStripMenuItem.Text = "Options";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
+            // toolStripAbout
+            // 
+            this.toolStripAbout.Name = "toolStripAbout";
+            this.toolStripAbout.Size = new System.Drawing.Size(24, 20);
+            this.toolStripAbout.Text = "?";
+            this.toolStripAbout.Click += new System.EventHandler(this.toolStripAbout_Click);
+            // 
             // buttonFin
             // 
             this.buttonFin.Location = new System.Drawing.Point(544, 373);
@@ -132,13 +140,6 @@
             this.panelTableau.TabIndex = 4;
             this.panelTableau.Paint += new System.Windows.Forms.PaintEventHandler(this.panelTableau_draw);
             // 
-            // toolStripAbout
-            // 
-            this.toolStripAbout.Name = "toolStripAbout";
-            this.toolStripAbout.Size = new System.Drawing.Size(24, 20);
-            this.toolStripAbout.Text = "?";
-            this.toolStripAbout.Click += new System.EventHandler(this.toolStripAbout_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -148,6 +149,7 @@
             this.Controls.Add(this.panelTableau);
             this.Controls.Add(this.panelGraphique);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(1024, 768);

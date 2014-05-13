@@ -14,19 +14,16 @@ namespace simulateurPergelisol_alpha_0._1
         private String m_langue;
         public about(string langue)
         {
-            string[] tabTexte = null;
+            string tabTexte = null;
             m_langue = langue;
 
             try
             {
-                using (StreamReader sr = new StreamReader("langage/" + m_langue + ".txt", Encoding.GetEncoding("iso-8859-1")))
+                using (StreamReader sr = new StreamReader("about/" + m_langue + "_about.txt", Encoding.GetEncoding("iso-8859-1")))
                 {
-                    tabTexte = sr.ReadToEnd().Split(';');
+                    tabTexte = sr.ReadToEnd();
                     sr.Close();
-                  
-                 
                 }
-
             }
 
             catch (Exception e)
@@ -35,10 +32,8 @@ namespace simulateurPergelisol_alpha_0._1
                 //TO DO
             }
 
-          
-
             InitializeComponent();
-            textBox1.Text = tabTexte[1];
+            textBox1.Text = tabTexte;
         }
     }
 }

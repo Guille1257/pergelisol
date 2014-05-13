@@ -80,7 +80,7 @@ namespace simulateurPergelisol_alpha_0._1
             m_solItem = m_listeSol[0];
             m_villageItem.Checked = m_coverTypeItem.Checked = m_solItem.Checked = true;
             this.panelTableau.BackgroundImage = Image.FromFile("image/Argile.png");
-            this.panelTableau.BackColor = Color.FromArgb(255, 111, 82, 64);
+            this.panelTableau.BackColor = Color.FromArgb(255, 72, 58, 48);
 
             this.panelTableau.BackgroundImageLayout = ImageLayout.Stretch;
 
@@ -696,16 +696,8 @@ namespace simulateurPergelisol_alpha_0._1
 
       private void toolStripAbout_Click(object sender, EventArgs e)
       {
-     if (m_formabout.IsDisposed)
-                {
-                    m_formabout = new about(m_langue);
-                    m_formabout.Visible = true;
-                }
-                else
-                {
-                    m_formabout.Visible = true;
-                }
-                Application.OpenForms["about"].BringToFront();
+           m_formabout = new about(m_langue);
+           m_formabout.ShowDialog();
       }
         #endregion
     }
@@ -1063,9 +1055,11 @@ namespace simulateurPergelisol_alpha_0._1
         private Graphique m_controlParent;
         private bool m_done;
         private int m_doneCount;
+        private int m_nbPixelCollision;
 
         public neigeContainer(int nbFloconPerThread, ref Graphique parent)
         {
+            m_nbPixelCollision = 30;
             m_controlParent = parent;
             delInvalidate = invalidateControl;
             hideDel = hideControl;
@@ -1143,12 +1137,12 @@ namespace simulateurPergelisol_alpha_0._1
                 if (rng.Next(0, 50) > 10)
                 {
                     m_arrayFlocons[i] = new Flocon(new int[] { tempGen, rng.Next(0, this.Size.Height) }, new int[] { rng.Next(tempGen, tempGen + 275), this.Size.Height },
-                                                    this.Size.Height - 5);
+                                                    this.Size.Height - m_nbPixelCollision);
                 }
                 else
                 {
                     m_arrayFlocons[i] = new Flocon(new int[] { tempGen, rng.Next(0, this.Size.Height) }, new int[] { rng.Next(tempGen - 100, tempGen), this.Size.Height },
-                                this.Size.Height - 5);
+                                this.Size.Height - m_nbPixelCollision);
                 }
             }
         }
@@ -1217,7 +1211,7 @@ namespace simulateurPergelisol_alpha_0._1
                         if (!m_done && !f.done)
                         {
                             f.reset(new int[] { tempGen, 0 }, new int[] { rng.Next(tempGen, tempGen + 275), this.Size.Height },
-                                  this.Size.Height - 5);
+                                  this.Size.Height - m_nbPixelCollision);
                         }
                     }
 
@@ -1226,7 +1220,7 @@ namespace simulateurPergelisol_alpha_0._1
                         if (!m_done && !f.done)
                         {
                             f.reset(new int[] { tempGen, 0 }, new int[] { rng.Next(tempGen - 100, tempGen), this.Size.Height },
-                                  this.Size.Height - 5);
+                                  this.Size.Height - m_nbPixelCollision);
                         }
                     }
 
@@ -1270,7 +1264,8 @@ namespace simulateurPergelisol_alpha_0._1
                 pe.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 foreach (Flocon f in m_arrayFlocons)
                 {
-                    pe.Graphics.FillEllipse(Brushes.White, f.coordinates[0], f.coordinates[1], f.taille, f.taille);
+                    if(!f.done)
+                        pe.Graphics.FillEllipse(Brushes.White, f.coordinates[0], f.coordinates[1], f.taille, f.taille);
                 }
             }
         }

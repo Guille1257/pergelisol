@@ -1,0 +1,19 @@
+﻿Data collected from october 2005 to septembre 2006 for : 
+Akulivik, 
+Aupaluk, 
+Ivujivik, 
+Kangiqsualujjuaq, 
+Kangiqsujuaq, 
+Kangirsuk, 
+Puvurnituq,
+Quaqtaq, 
+Salluit, 
+Tasiujaq,
+Umiujaq
+
+Data collected from october 2008 to septembre 2009 for : 
+Inukjuak,
+Kuujjuaq
+
+
+Developped by Samuel Côté and Guillaume Champagne (2014)
